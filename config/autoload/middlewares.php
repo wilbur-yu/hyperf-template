@@ -19,6 +19,5 @@ return [
     'http' => [
         DebugMiddleware::class,
         CorsMiddleware::class,
-        Hyperf\Validation\Middleware\ValidationMiddleware::class,
     ],
 ];
