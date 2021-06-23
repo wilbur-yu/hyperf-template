@@ -357,12 +357,12 @@ class OptionalPackages
             return;
         }
         $sourceIsDir     = is_dir($this->installerSource . $resource);
+        $sourceIsFile    = is_file($this->installerSource . $resource);
         $destinationPath = dirname($this->projectRoot . $target);
-        if (! is_dir($this->projectRoot . $target)
-            && ! mkdir($concurrentDirectory = $this->projectRoot . $target, 0755, true)) {
+        if ($sourceIsDir && ! mkdir($concurrentDirectory = $this->projectRoot . $target, 0755, true)) {
             throw new RuntimeException(sprintf('Directory "%s" was not created', $destinationPath . $target));
         }
-        if (! is_dir($destinationPath) && ! mkdir($destinationPath, 0775, true)) {
+        if ($sourceIsFile && ! is_dir($destinationPath) && ! mkdir($destinationPath, 0775, true)) {
             throw new RuntimeException(sprintf('Directory "%s" was not created', $destinationPath));
         }
 
