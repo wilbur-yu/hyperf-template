@@ -171,7 +171,6 @@ return [
                         'resources/async_queue/async_queue.php'         => 'config/autoload/async_queue.php',
                         'resources/async_queue/AsyncQueueConsumer.php'  => 'app/Process/AsyncQueueConsumer.php',
                         'resources/async_queue/QueueHandleListener.php' => 'app/Listener/QueueHandleListener.php',
-                        'resources/database/redis.php'                  => 'config/autoload/redis.php',
                     ],
                 ],
             ],
