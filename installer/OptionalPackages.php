@@ -185,7 +185,7 @@ class OptionalPackages
      * Prompt for a single optional installation package.
      *
      * @param string $questionName Name of question
-     * @param array  $question Question details from configuration
+     * @param array  $question     Question details from configuration
      */
     public function promptForOptionalPackage(string $questionName, array $question): void
     {
@@ -347,8 +347,8 @@ class OptionalPackages
      * Copy a file to its final destination in the skeleton.
      *
      * @param string $resource resource file
-     * @param string $target destination
-     * @param bool   $force whether or not to copy over an existing file
+     * @param string $target   destination
+     * @param bool   $force    whether or not to copy over an existing file
      */
     public function copyResource(string $resource, string $target, bool $force = false): void
     {
