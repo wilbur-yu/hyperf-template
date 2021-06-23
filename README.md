@@ -1,5 +1,5 @@
 # 介绍
-结合自 `hyperf/hyperf-skeleton` 和 `hyperf/biz-skeleton` 项目, 添加了一些自用代码和第三方包以及三方项目代码码
+结合自 `hyperf/hyperf-skeleton` 和 `hyperf/biz-skeleton` 项目, 添加了一些自用代码和第三方包以及三方项目代码
 > 自用, 仅供参考
 
 # 使用
