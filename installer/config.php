@@ -92,7 +92,7 @@ return [
             'version' => '^5.5',
         ],
         'wilbur-yu/hyperf-options'  => [
-            'version' => '^1.0',
+            'version' => '^0.1',
         ],
     ],
     'require-dev' => [
@@ -267,9 +267,9 @@ return [
                         'hyperf/validation',
                     ],
                     'resources' => [
-                        'resources/validation/Request'         => 'app/Request',
-                        'resources/validation/exceptions.php'  => 'config/autoload/exceptions.php',
-                        'resources/validation/middlewares.php' => 'config/autoload/middlewares.php',
+                        'resources/validation/Request/Request.php'         => 'app/Request/Request.php',
+                        'resources/validation/exceptions.php'              => 'config/autoload/exceptions.php',
+                        'resources/validation/middlewares.php'             => 'config/autoload/middlewares.php',
                     ],
                 ],
             ],
