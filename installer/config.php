@@ -127,7 +127,7 @@ return [
                 'y' => [
                     'name'      => 'yes',
                     'packages'  => [
-                        'wilbur-yu/options',
+                        'wilbur-yu/hyperf-options',
                     ],
                     'resources' => [
                         'resources/options/options.php'              => 'config/autoload/options.php',
