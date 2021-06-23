@@ -126,7 +126,7 @@ class OptionalPackages
     {
         $ask[]  = "\n  <question>What time zone do you want to setup ?</question>\n";
         $ask[]  = "  [<comment>n</comment>] Default time zone for php.ini\n";
-        $ask[]  = "Make your selection or type a time zone name, like Asia/Shanghai (n):\n";
+        $ask[]  = "Make your selection or type a time zone name, like Asia/Shanghai (y):\n";
         $answer = $this->io->ask(implode('', $ask), 'y');
 
         $content = file_get_contents($this->installerSource . '/resources/bin/hyperf.stub');
