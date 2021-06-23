@@ -185,7 +185,7 @@ class OptionalPackages
      * Prompt for a single optional installation package.
      *
      * @param string $questionName Name of question
-     * @param array  $question     Question details from configuration
+     * @param array  $question Question details from configuration
      */
     public function promptForOptionalPackage(string $questionName, array $question): void
     {
@@ -347,8 +347,8 @@ class OptionalPackages
      * Copy a file to its final destination in the skeleton.
      *
      * @param string $resource resource file
-     * @param string $target   destination
-     * @param bool   $force    whether or not to copy over an existing file
+     * @param string $target destination
+     * @param bool   $force whether or not to copy over an existing file
      */
     public function copyResource(string $resource, string $target, bool $force = false): void
     {
@@ -358,13 +358,14 @@ class OptionalPackages
         }
         $sourceIsDir     = is_dir($this->installerSource . $resource);
         $destinationPath = dirname($this->projectRoot . $target);
-        if (! mkdir($concurrentDirectory = $this->projectRoot . $target, 0755, true)
-            && ! is_dir($concurrentDirectory)) {
+        if (! is_dir($this->projectRoot . $target)
+            && ! mkdir($concurrentDirectory = $this->projectRoot . $target, 0755, true)) {
             throw new RuntimeException(sprintf('Directory "%s" was not created', $destinationPath . $target));
         }
-        if (! mkdir($destinationPath, 0775, true) && ! is_dir($destinationPath)) {
+        if (! is_dir($destinationPath) && ! mkdir($destinationPath, 0775, true)) {
             throw new RuntimeException(sprintf('Directory "%s" was not created', $destinationPath));
         }
+
         $this->io->write(sprintf('  - Copying <info>%s</info>', $target));
         if (! $sourceIsDir) {
             copy($this->installerSource . $resource, $this->projectRoot . $target);
