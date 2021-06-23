@@ -190,7 +190,6 @@ return [
                     'resources' => [
                         'resources/model_cache/Model.php'     => 'app/Model/Model.php',
                         'resources/model_cache/databases.php' => 'config/autoload/databases.php',
-                        'resources/database/redis.php'        => 'config/autoload/redis.php',
                     ],
                 ],
             ],
