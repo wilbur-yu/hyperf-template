@@ -14,7 +14,6 @@ declare(strict_types = 1);
  */
 use App\Contract\CacheInterface;
 use App\Kernel\Log\Log;
-use App\Service\OptionService;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\ExceptionHandler\Formatter\FormatterInterface;
 use Hyperf\HttpServer\Contract\RequestInterface;
@@ -83,7 +82,7 @@ if (! function_exists('hide_str')) {
      *
      * @return string 处理后的字符串
      */
-    function hide_str(?string $string, $start = 0, $length = 0, $re = '*')
+    function hide_str(?string $string, int $start = 0, int $length = 0, string $re = '*')
     {
         if (empty($string)) {
             return '';
@@ -123,7 +122,7 @@ if (! function_exists('app')) {
      *
      * @return mixed|\Psr\Container\ContainerInterface
      */
-    function app($id = null)
+    function app(?string $id = null)
     {
         $container = container();
         if ($id) {
@@ -150,7 +149,7 @@ if (! function_exists('get_available_no')) {
     /**
      * 支持中小型支付系统，单机房生成订单号QPS<=1w，保证订单号绝对唯一
      */
-    function get_available_no(string $prefix = '', int $length = 22): string
+    function get_available_no(string $prefix = ''): string
     {
         return $prefix . date('YmdHis') .
                substr(implode(null, array_map('ord', str_split(substr(uniqid('', true), 7, 13)))), 0, 8);
@@ -435,13 +434,6 @@ if (! function_exists('with')) {
     function with($value, callable $callback = null)
     {
         return is_null($callback) ? $value : $callback($value);
-    }
-}
-
-if (! function_exists('option')) {
-    function option(): OptionService
-    {
-        return make(OptionService::class);
     }
 }
 
