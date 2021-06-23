@@ -356,13 +356,16 @@ class OptionalPackages
             return;
         }
         $destinationPath = dirname($this->projectRoot . $target);
+        $sourcePathIsDir = is_dir($this->installerSource . $resource);
         if (! is_dir($destinationPath)) {
             if (! mkdir($destinationPath, 0775, true) && ! is_dir($destinationPath)) {
                 throw new \RuntimeException(sprintf('Directory "%s" was not created', $destinationPath));
             }
         }
         $this->io->write(sprintf('  - Copying <info>%s</info>', $target));
-        copy($this->installerSource . $resource, $this->projectRoot . $target);
+        if (! $sourcePathIsDir) {
+            copy($this->installerSource . $resource, $this->projectRoot . $target);
+        }
     }
 
     /**

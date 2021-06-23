@@ -209,9 +209,9 @@ return [
                         'hyperf/task',
                     ],
                     'resources' => [
-                        'resources/view/view.php'         => 'config/autoload/view.php',
-                        'resources/view/storage'          => 'storage/',
-                        'resources/task/server.php'       => 'config/autoload/server.php',
+                        'resources/view/view.php'               => 'config/autoload/view.php',
+                        'resources/view/storage/views'          => 'storage/',
+                        'resources/task/server.php'             => 'config/autoload/server.php',
                     ],
                 ],
             ],
