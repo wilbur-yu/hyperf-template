@@ -267,9 +267,9 @@ return [
                         'hyperf/validation',
                     ],
                     'resources' => [
-                        'resources/validation/Request'        => 'app/Request',
-                        'resources/validation/exceptions.php' => 'config/autoload/exceptions.php',
-                        'resources/validation/middleware.php' => 'config/autoload/middleware.php',
+                        'resources/validation/Request'         => 'app/Request',
+                        'resources/validation/exceptions.php'  => 'config/autoload/exceptions.php',
+                        'resources/validation/middlewares.php' => 'config/autoload/middlewares.php',
                     ],
                 ],
             ],
