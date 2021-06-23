@@ -31,16 +31,11 @@ return [
             'heartbeat'       => -1,
             'max_idle_time'   => (float) env('DB_MAX_IDLE_TIME', 60),
         ],
-        'commands'  => [
+        'commands' => [
             'gen:model' => [
-                'path'             => 'app/Model',
-                'force_casts'      => true,
-                'inheritance'      => 'Model',
-                'uses'             => '',
-                'table_mapping'    => [],
-                'refresh_fillable' => true,
-                'with_comments'    => true,
-                'visitors'         => [],
+                'path'        => 'app/Model',
+                'force_casts' => true,
+                'inheritance' => 'Model',
             ],
         ],
     ],

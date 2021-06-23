@@ -33,7 +33,16 @@
         "hyperf/logger": "~2.1.0",
         "hyperf/memory": "~2.1.0",
         "hyperf/process": "~2.1.0",
-        "wilbur-yu/hyperf-opcache": "~0.0.4"
+        "hyperf/utils": "~2.1.0",
+        "wilbur-yu/hyperf-opcache": "~0.0.4",
+        "hyperf/database": "~2.1.0",
+        "wilbur-yu/hyperf-options": "^1.0",
+        "hyperf/redis": "~2.1.0",
+        "hyperf/async-queue": "~2.1.0",
+        "hyperf/model-cache": "~2.1.0",
+        "hyperf/view": "~2.1.0",
+        "hyperf/view-engine": "~2.1.0",
+        "hyperf/task": "~2.1.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
@@ -45,7 +54,6 @@
         "hyperf/testing": "~2.1.0",
         "hyperf/watcher": "~2.1.0",
         "wilbur/hyperf-soar": "^2.0"
-
     },
     "suggest": {
         "ext-openssl": "Required to use HTTPS.",
@@ -58,8 +66,7 @@
             "App\\": "app/",
             "Installer\\": "installer/"
         },
-        "files": [
-        ]
+        "files": []
     },
     "autoload-dev": {
         "psr-4": {
@@ -72,7 +79,16 @@
         "optimize-autoloader": true,
         "sort-packages": true
     },
-    "extra": {},
+    "extra": {
+        "optional-packages": {
+            "database": "y",
+            "options": "y",
+            "redis": "y",
+            "async-queue": "y",
+            "model-cache": "y",
+            "view": "y"
+        }
+    },
     "scripts": {
         "pre-install-cmd": "Installer\\Script::install",
         "pre-update-cmd": "Installer\\Script::install",

@@ -25,6 +25,7 @@ use Composer\Package\Version\VersionParser;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use RuntimeException;
 
 class OptionalPackages
 {
@@ -148,7 +149,7 @@ class OptionalPackages
 
         if (! is_dir($runtimeDir)) {
             if (! mkdir($runtimeDir, 0775, true) && ! is_dir($runtimeDir)) {
-                throw new \RuntimeException(sprintf('Directory "%s" was not created', $runtimeDir));
+                throw new RuntimeException(sprintf('Directory "%s" was not created', $runtimeDir));
             }
             chmod($runtimeDir, 0775);
         }
@@ -355,15 +356,17 @@ class OptionalPackages
         if ($force === false && is_file($this->projectRoot . $target)) {
             return;
         }
+        $sourceIsDir     = is_dir($this->installerSource . $resource);
         $destinationPath = dirname($this->projectRoot . $target);
-        $sourcePathIsDir = is_dir($this->installerSource . $resource);
-        if (! is_dir($destinationPath)) {
-            if (! mkdir($destinationPath, 0775, true) && ! is_dir($destinationPath)) {
-                throw new \RuntimeException(sprintf('Directory "%s" was not created', $destinationPath));
-            }
+        if (! mkdir($concurrentDirectory = $this->projectRoot . $target, 0755, true)
+            && ! is_dir($concurrentDirectory)) {
+            throw new RuntimeException(sprintf('Directory "%s" was not created', $destinationPath . $target));
+        }
+        if (! mkdir($destinationPath, 0775, true) && ! is_dir($destinationPath)) {
+            throw new RuntimeException(sprintf('Directory "%s" was not created', $destinationPath));
         }
         $this->io->write(sprintf('  - Copying <info>%s</info>', $target));
-        if (! $sourcePathIsDir) {
+        if (! $sourceIsDir) {
             copy($this->installerSource . $resource, $this->projectRoot . $target);
         }
     }
@@ -411,7 +414,7 @@ class OptionalPackages
     private function askQuestion(array $question, $defaultOption)
     {
         // Construct question
-        $ask = [
+        $ask         = [
             sprintf("\n  <question>%s</question>\n", $question['question']),
         ];
         $defaultText = $defaultOption;
