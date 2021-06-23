@@ -1,0 +1,41 @@
+<?php
+
+declare(strict_types = 1);
+/**
+ * This file is part of project hyperf-template.
+ *
+ * @author   wenber.yu@creative-life.club
+ * @link     https://github.com/wilbur-yu/hyperf-template
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
+return [
+    'default' => [
+        'host'     => 'localhost',
+        'port'     => 5672,
+        'user'     => 'guest',
+        'password' => 'guest',
+        'vhost'    => '/',
+        'pool'     => [
+            'min_connections' => 1,
+            'max_connections' => 10,
+            'connect_timeout' => 10.0,
+            'wait_timeout'    => 3.0,
+            'heartbeat'       => -1,
+        ],
+        'params' => [
+            'insist'             => false,
+            'login_method'       => 'AMQPLAIN',
+            'login_response'     => null,
+            'locale'             => 'en_US',
+            'connection_timeout' => 3.0,
+            'read_write_timeout' => 6.0,
+            'context'            => null,
+            'keepalive'          => false,
+            'heartbeat'          => 3,
+        ],
+    ],
+];
