@@ -44,7 +44,7 @@
         "hyperf/devtool": "~2.1.0",
         "hyperf/testing": "~2.1.0",
         "hyperf/watcher": "~2.1.0",
-        "wilbur/hyperf-soar": "dev-master"
+        "wilbur/hyperf-soar": "^2.0"
 
     },
     "suggest": {
