@@ -367,7 +367,7 @@ class OptionalPackages
         }
 
         $this->io->write(sprintf('  - Copying <info>%s</info>', $target));
-        if (! $sourceIsDir) {
+        if ($sourceIsFile) {
             copy($this->installerSource . $resource, $this->projectRoot . $target);
         }
     }
