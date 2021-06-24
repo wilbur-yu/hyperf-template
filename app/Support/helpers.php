@@ -13,36 +13,17 @@ declare(strict_types = 1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 use App\Kernel\Contract\CacheInterface;
+use App\Kernel\Contract\ResponseInterface;
 use App\Kernel\Log\Log;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\ExceptionHandler\Formatter\FormatterInterface;
 use Hyperf\HttpServer\Contract\RequestInterface;
-use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\Server\ServerFactory;
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Str;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Swoole\WebSocket\Frame;
-
-//use HyperfExt\Auth\Contracts\AuthManagerInterface;
-
-//use Psr\Http\Message\ServerRequestInterface;
-
-//if (!function_exists('auth')) {
-//	/**
-//	 * hyperf-ext/auth: Auth认证辅助方法
-//	 * @param string|null $guard
-//	 * @return \HyperfExt\Auth\Contracts\GuardInterface|\HyperfExt\Auth\Contracts\StatefulGuardInterface|\HyperfExt\Auth\Contracts\StatelessGuardInterface
-//	 */
-//	function auth(string $guard = null)
-//	{
-//		if (is_null($guard)) {
-//			$guard = config('auth.default.guard');
-//		}
-//		return make(AuthManagerInterface::class)->guard($guard);
-//	}
-//}
 
 if (! function_exists('format_duration')) {
     /**
@@ -179,6 +160,7 @@ if (! function_exists('format_throwable')) {
 
 if (! function_exists('throw_if')) {
     /**
+     * @license https://github.com/laravel/framework
      * Throw the given exception if the given condition is true.
      *
      * @param string|\Throwable $exception
@@ -200,6 +182,7 @@ if (! function_exists('throw_if')) {
 
 if (! function_exists('throw_unless')) {
     /**
+     * @license https://github.com/laravel/framework
      * Throw the given exception unless the given condition is true.
      *
      * @param bool              $condition
@@ -217,16 +200,6 @@ if (! function_exists('throw_unless')) {
         }
 
         return $condition;
-    }
-}
-
-/*
- * redis 客户端实例
- */
-if (! function_exists('redis')) {
-    function redis(): Hyperf\Redis\Redis
-    {
-        return container()->get(Redis::class);
     }
 }
 
@@ -350,6 +323,7 @@ if (! function_exists('response')) {
 
 if (! function_exists('blank')) {
     /**
+     * @license https://github.com/laravel/framework
      * Determine if the given value is "blank".
      *
      * @param mixed $value
@@ -378,6 +352,7 @@ if (! function_exists('blank')) {
 
 if (! function_exists('filled')) {
     /**
+     * @license https://github.com/laravel/framework
      * Determine if a value is "filled".
      *
      * @param mixed $value
@@ -392,6 +367,8 @@ if (! function_exists('retry')) {
     /**
      * Retry an operation a given number of times.
      *
+     * @param int           $times
+     * @param callable      $callback
      * @param int           $sleep
      * @param null|callable $when
      *
@@ -399,7 +376,7 @@ if (! function_exists('retry')) {
      *
      * @return mixed
      */
-    function retry(int $times, callable $callback, $sleep = 0, $when = null)
+    function retry(int $times, callable $callback, int $sleep = 0, callable $when = null)
     {
         $attempts = 0;
 
@@ -425,6 +402,7 @@ if (! function_exists('retry')) {
 
 if (! function_exists('with')) {
     /**
+     * @license https://github.com/laravel/framework
      * Return the given value, optionally passed through the given callback.
      *
      * @param mixed $value
