@@ -45,7 +45,7 @@ return [
         Constant::OPTION_BUFFER_OUTPUT_SIZE    => 2 * 1024 * 1024,
         Constant::OPTION_TASK_WORKER_NUM       => $appEnv !== 'prod' ? 1 : 2,
         Constant::OPTION_TASK_ENABLE_COROUTINE => false,
-        Constant::OPTION_DOCUMENT_ROOT         => BASE_PATH . '/public',
+        // Constant::OPTION_DOCUMENT_ROOT         => BASE_PATH . '/public',
         Constant::OPTION_ENABLE_STATIC_HANDLER => true,
     ],
     'callbacks' => [
