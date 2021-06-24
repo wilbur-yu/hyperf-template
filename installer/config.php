@@ -315,15 +315,15 @@ return [
                     'packages' => [
                         'hyperf-ext/encryption',
                     ],
-                    'commands' => [
-                        'post-autoload-dump' => [
-                            'php ./bin/hyperf.php vendor:publish hyperf-ext/encryption',
-                            'php ./bin/hyperf.php gen:key',
-                        ],
-                    ],
+                    // 'commands' => [
+                    //     'post-autoload-dump' => [
+                    //         'php ./bin/hyperf.php vendor:publish hyperf-ext/encryption',
+                    //         'php ./bin/hyperf.php gen:key',
+                    //     ],
+                    // ],
                     'tips'     => [
-                        '安装完成后请执行: php ./bin/hyperf.php vendor:publish hyperf-ext/encryption',
-                        '安装完成后请执行: php ./bin/hyperf.php gen:key',
+                        'The installation is complete, please run (php ./bin/hyperf.php vendor:publish hyperf-ext/encryption)',
+                        'The installation is complete, please run (php ./bin/hyperf.php gen:key)',
                     ],
                 ],
             ],
@@ -340,13 +340,13 @@ return [
                     'packages' => [
                         'hyperf-ext/hashing',
                     ],
-                    'commands' => [
-                        'post-autoload-dump' => [
-                            'php ./bin/hyperf.php vendor:publish hyperf-ext/hashing',
-                        ],
-                    ],
+                    // 'commands' => [
+                    //     'post-autoload-dump' => [
+                    //         'php ./bin/hyperf.php vendor:publish hyperf-ext/hashing',
+                    //     ],
+                    // ],
                     'tips'     => [
-                        '安装完成后请执行: php ./bin/hyperf.php vendor:publish hyperf-ext/hashing',
+                        'The installation is complete, please run (php ./bin/hyperf.php vendor:publish hyperf-ext/hashing)',
                     ],
                 ],
             ],
