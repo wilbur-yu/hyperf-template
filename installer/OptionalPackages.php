@@ -37,75 +37,73 @@ class OptionalPackages
     /**
      * @var IOInterface
      */
-    public $io;
+    public IOInterface $io;
 
     /**
      * Assets to remove during cleanup.
      *
      * @var string[]
      */
-    private $assetsToRemove = [
+    private array $assetsToRemove = [
         '.travis.yml',
     ];
 
     /**
      * @var array
      */
-    private $config;
+    private array $config;
 
     /**
      * @var Composer
      */
-    private $composer;
+    private Composer $composer;
 
     /**
      * @var array
      */
-    private $composerDefinition;
+    private array $composerDefinition;
 
     /**
      * @var JsonFile
      */
-    private $composerJson;
+    private JsonFile $composerJson;
 
     /**
      * @var Link[]
      */
-    private $composerRequires;
+    private array $composerRequires;
 
     /**
      * @var Link[]
      */
-    private $composerDevRequires;
-
-    private array $composerScripts;
+    private array $composerDevRequires;
 
     /**
      * @var string[] Dev dependencies to remove after install is complete
      */
-    private $devDependencies = [
+    private array $devDependencies = [
         'composer/composer',
     ];
 
     /**
      * @var string path to this file
      */
-    private $installerSource;
+    private string $installerSource;
 
     /**
      * @var string
      */
-    private $projectRoot;
+    private string $projectRoot;
 
     /**
      * @var RootPackageInterface
      */
-    private $rootPackage;
+    private RootPackageInterface $rootPackage;
 
     /**
      * @var int[]
      */
-    private $stabilityFlags;
+    private array $stabilityFlags;
 
     public function __construct(IOInterface $io, Composer $composer, string $projectRoot = null)
     {
@@ -301,15 +299,19 @@ class OptionalPackages
 
     public function addScript(string $event, array $commands): void
     {
-        if (isset($this->composerScripts[$event])) {
-            $this->rootPackage->setScripts([$event => $commands]);
+        if (isset($this->composerDefinition['scripts'][$event])) {
+            foreach ($commands as $command) {
+                $this->composerDefinition['scripts'][$event][] = $command;
+            }
         } else {
-            $this->io->write(sprintf(
-                '  - Adding script <error>%s error, %s there is no </error>',
-                implode('and', $commands),
-                $event
-            ));
+            $this->composerDefinition['scripts'][$event] = $commands;
         }
+
+        $this->io->write(sprintf(
+            '  - Adding script <info>%s</info> (<comment>%s</comment>)',
+            $event,
+            implode(' and ', $commands),
+        ));
     }
 
     /**
@@ -544,7 +546,5 @@ class OptionalPackages
         $this->composerDevRequires = $this->rootPackage->getDevRequires();
         // Get stability flags
         $this->stabilityFlags = $this->rootPackage->getStabilityFlags();
-        // Get scripts
-        $this->composerScripts = $this->rootPackage->getScripts();
     }
 }
