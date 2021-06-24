@@ -88,6 +88,9 @@ return [
         'hyperf/task'               => [
             'version' => '~2.1.0',
         ],
+        'hyperf/resource'           => [
+            'version' => '~2.1.0',
+        ],
         'overtrue/wechat'           => [
             'version' => '^5.5',
         ],
@@ -98,7 +101,7 @@ return [
     'require-dev' => [
     ],
     'questions'   => [
-        'database'      => [
+        'database'    => [
             'question'       => 'Do you want to use Database (MySQL Client) ?',
             'default'        => 'y',
             'required'       => false,
@@ -117,7 +120,7 @@ return [
                 ],
             ],
         ],
-        'options'       => [
+        'options'     => [
             'question'       => 'Do you want to use wilbur-yu/options component ?',
             'default'        => 'y',
             'required'       => false,
@@ -155,7 +158,7 @@ return [
         //         ],
         //     ],
         // ],
-        'async-queue'   => [
+        'async-queue' => [
             'question'       => 'Do you want to use hyperf/async-queue component ? (A simple redis queue component)',
             'default'        => 'n',
             'required'       => false,
@@ -175,7 +178,7 @@ return [
                 ],
             ],
         ],
-        'model-cache'   => [
+        'model-cache' => [
             'question'       => 'Do you want to use hyperf/model-cache component ?',
             'default'        => 'n',
             'required'       => false,
@@ -194,7 +197,7 @@ return [
                 ],
             ],
         ],
-        'view'          => [
+        'view'        => [
             'question'       => 'Do you want to use hyperf/view component ?',
             'default'        => 'n',
             'required'       => false,
@@ -209,14 +212,14 @@ return [
                         'hyperf/task',
                     ],
                     'resources' => [
-                        'resources/view/view.php'                => 'config/autoload/view.php',
-                        'resources/view/storage/views/'          => 'storage/views/',
-                        'resources/task/server.php'              => 'config/autoload/server.php',
+                        'resources/view/view.php'       => 'config/autoload/view.php',
+                        'resources/view/storage/views/' => 'storage/views/',
+                        'resources/task/server.php'     => 'config/autoload/server.php',
                     ],
                 ],
             ],
         ],
-        'session'       => [
+        'session'     => [
             'question'       => 'Do you want to use hyperf/session component ?',
             'default'        => 'n',
             'required'       => false,
@@ -235,7 +238,7 @@ return [
                 ],
             ],
         ],
-        'wechat'        => [
+        'wechat'      => [
             'question'       => 'Do you want to use hyperf/view component ?',
             'default'        => 'n',
             'required'       => false,
@@ -248,13 +251,13 @@ return [
                         'overtrue/wechat',
                     ],
                     'resources' => [
-                        'resources/wechat/wechat.php'                   => 'config/autoload/wechat.php',
-                        'resources/wechat/Factory/WechatFactory.php'    => 'app/Factory/WechatFactory.php',
+                        'resources/wechat/wechat.php'                => 'config/autoload/wechat.php',
+                        'resources/wechat/Factory/WechatFactory.php' => 'app/Factory/WechatFactory.php',
                     ],
                 ],
             ],
         ],
-        'validation'    => [
+        'validation'  => [
             'question'       => 'Do you want to use hyperf/validation component ?',
             'default'        => 'n',
             'required'       => false,
@@ -267,9 +270,28 @@ return [
                         'hyperf/validation',
                     ],
                     'resources' => [
-                        'resources/validation/Request/Request.php'         => 'app/Request/Request.php',
-                        'resources/validation/exceptions.php'              => 'config/autoload/exceptions.php',
-                        'resources/validation/middlewares.php'             => 'config/autoload/middlewares.php',
+                        'resources/validation/Request/Request.php' => 'app/Request/Request.php',
+                        'resources/validation/exceptions.php'      => 'config/autoload/exceptions.php',
+                        'resources/validation/middlewares.php'     => 'config/autoload/middlewares.php',
+                    ],
+                ],
+            ],
+        ],
+        'resource'    => [
+            'question'       => 'Do you want to use hyperf/resource component ?',
+            'default'        => 'n',
+            'required'       => false,
+            'force'          => false,
+            'custom-package' => true,
+            'options'        => [
+                'y' => [
+                    'name'      => 'yes',
+                    'packages'  => [
+                        'hyperf/resource',
+                    ],
+                    'resources' => [
+                        'resources/resource/Resource.php'                 => 'app/Resource/Resource.php',
+                        'resources/resource/CustomResourceCollection.php' => 'app/Resource/CustomResourceCollection.php',
                     ],
                 ],
             ],
