@@ -316,7 +316,7 @@ return [
                         'hyperf-ext/encryption',
                     ],
                     'commands' => [
-                        'post-root-package-install' => [
+                        'post-autoload-dump' => [
                             'php ./bin/hyperf.php vendor:publish hyperf-ext/encryption',
                             'php ./bin/hyperf.php gen:key',
                         ],
@@ -337,7 +337,7 @@ return [
                         'hyperf-ext/hashing',
                     ],
                     'commands' => [
-                        'post-root-package-install' => [
+                        'post-autoload-dump' => [
                             'php ./bin/hyperf.php vendor:publish hyperf-ext/hashing',
                         ],
                     ],
