@@ -49,6 +49,11 @@ class Response extends BaseResponse implements ResponseInterface
         return $this->formatting($code, $message, [], $errors);
     }
 
+    public function custom(array $data = []): PsrResponseInterface
+    {
+        return $this->json($data);
+    }
+
     protected function formatting(int $code, string $message, $data = [], $errors = []): PsrResponseInterface
     {
         $body = [
@@ -63,9 +68,20 @@ class Response extends BaseResponse implements ResponseInterface
 
         $body = $this->toJson($body);
 
-        return $this->getResponse()
-            ->withHeader('Author', $this->author)
-            ->withAddedHeader('content-type', 'application/json; charset=utf-8')
+        return $this->withCustomHeaders(['content-type' => 'application/json; charset=utf-8'])
             ->withBody(new SwooleStream($body));
+    }
+
+    protected function withCustomHeaders(array $headers): PsrResponseInterface
+    {
+        $config  = config('app_response_headers');
+        $headers = array_merge($config, $headers);
+
+        $response = $this->getResponse();
+        foreach ($headers as $key => $value) {
+            $response = $response->withHeader($key, $value);
+        }
+
+        return $response;
     }
 }
