@@ -274,24 +274,24 @@ return [
                 ],
             ],
         ],
-        'constants'     => [
-            'question'       => 'Do you want to use hyperf/constants component ?',
-            'default'        => 'y',
-            'required'       => false,
-            'force'          => true,
-            'custom-package' => false,
-            'options'        => [
-                'y' => [
-                    'name'      => 'yes',
-                    'packages'  => [
-                        'hyperf/constants',
-                    ],
-                    'resources' => [
-                        'resources/constants/ErrorCode.php'         => 'app/Constants/ErrorCode.php',
-                        'resources/constants/BusinessException.php' => 'app/Exception/BusinessException.php',
-                    ],
-                ],
-            ],
-        ],
+        // 'constants'     => [
+        //     'question'       => 'Do you want to use hyperf/constants component ?',
+        //     'default'        => 'y',
+        //     'required'       => false,
+        //     'force'          => true,
+        //     'custom-package' => false,
+        //     'options'        => [
+        //         'y' => [
+        //             'name'      => 'yes',
+        //             'packages'  => [
+        //                 'hyperf/constants',
+        //             ],
+        //             'resources' => [
+        //                 'resources/constants/ErrorCode.php'         => 'app/Constants/ErrorCode.php',
+        //                 'resources/constants/BusinessException.php' => 'app/Exception/BusinessException.php',
+        //             ],
+        //         ],
+        //     ],
+        // ],
     ],
 ];
