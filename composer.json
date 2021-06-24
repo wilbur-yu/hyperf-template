@@ -20,7 +20,9 @@
         "php": ">=7.4",
         "ext-json": "*",
         "ext-openssl": "*",
+        "ext-redis": "*",
         "ext-swoole": "*",
+        "ext-zend-opcache": "*",
         "hyperf/cache": "~2.1.0",
         "hyperf/command": "~2.1.0",
         "hyperf/config": "~2.1.0",
@@ -37,14 +39,15 @@
         "wilbur-yu/hyperf-opcache": "~0.0.4"
     },
     "require-dev": {
-        "roave/security-advisories": "dev-latest",
-        "swoole/ide-helper": "^4.5",
+        "composer/composer": "^2.1",
         "friendsofphp/php-cs-fixer": "^3.0",
-        "mockery/mockery": "^1.0",
-        "phpstan/phpstan": "^0.12",
         "hyperf/devtool": "~2.1.0",
         "hyperf/testing": "~2.1.0",
         "hyperf/watcher": "~2.1.0",
+        "mockery/mockery": "^1.0",
+        "phpstan/phpstan": "^0.12",
+        "roave/security-advisories": "dev-latest",
+        "swoole/ide-helper": "^4.5",
         "wilbur/hyperf-soar": "^2.0"
     },
     "suggest": {

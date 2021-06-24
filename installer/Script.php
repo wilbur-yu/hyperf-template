@@ -18,7 +18,7 @@ use Composer\Script\Event;
 
 class Script
 {
-    public static function install(Event $event)
+    public static function install(Event $event): void
     {
         $installer = new OptionalPackages($event->getIO(), $event->getComposer());
 

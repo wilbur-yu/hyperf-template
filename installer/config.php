@@ -97,6 +97,12 @@ return [
         'wilbur-yu/hyperf-options'  => [
             'version' => '^0.1',
         ],
+        'hyperf-ext/encryption'     => [
+            'version' => '^2.1',
+        ],
+        'hyperf-ext/hashing'        => [
+            'version' => '^2.1',
+        ],
     ],
     'require-dev' => [
     ],
@@ -117,6 +123,7 @@ return [
                     'resources' => [
                         'resources/database/databases.php' => 'config/autoload/databases.php',
                     ],
+                    'commands'  => [],
                 ],
             ],
         ],
@@ -292,6 +299,45 @@ return [
                     'resources' => [
                         'resources/resource/Resource.php'                 => 'app/Resource/Resource.php',
                         'resources/resource/CustomResourceCollection.php' => 'app/Resource/CustomResourceCollection.php',
+                    ],
+                ],
+            ],
+        ],
+        'encryption'  => [
+            'question'       => 'Do you want to use hyperf-ext/encryption component ?',
+            'default'        => 'n',
+            'required'       => false,
+            'force'          => false,
+            'custom-package' => true,
+            'options'        => [
+                'y' => [
+                    'name'      => 'yes',
+                    'packages'  => [
+                        'hyperf-ext/encryption',
+                    ],
+                    'resources' => [
+                        'resources/encryption/encryption.php' => 'config/autoload/encryption.php',
+                    ],
+                    'commands'  => [
+                        'post-root-package-install' => 'php ./bin/hyperf.php gen:key',
+                    ],
+                ],
+            ],
+        ],
+        'hashing'     => [
+            'question'       => 'Do you want to use hyperf-ext/hashing component ?',
+            'default'        => 'n',
+            'required'       => false,
+            'force'          => false,
+            'custom-package' => true,
+            'options'        => [
+                'y' => [
+                    'name'      => 'yes',
+                    'packages'  => [
+                        'hyperf-ext/hashing',
+                    ],
+                    'resources' => [
+                        'resources/encryption/hashing.php' => 'config/autoload/hashing.php',
                     ],
                 ],
             ],

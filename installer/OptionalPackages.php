@@ -78,6 +78,8 @@ class OptionalPackages
      */
     private $composerDevRequires;
 
+    private array $composerScripts;
+
     /**
      * @var string[] Dev dependencies to remove after install is complete
      */
@@ -186,6 +188,8 @@ class OptionalPackages
      *
      * @param string $questionName Name of question
      * @param array  $question Question details from configuration
+     *
+     * @throws \Exception
      */
     public function promptForOptionalPackage(string $questionName, array $question): void
     {
@@ -267,11 +271,12 @@ class OptionalPackages
                 }
             }
             // Copy files
-            if (isset($question['options'][$answer])) {
-                $force = ! empty($question['force']);
-                foreach ($question['options'][$answer]['resources'] as $resource => $target) {
-                    $this->copyResource($resource, $target, $force);
-                }
+            // if (isset($question['options'][$answer])) {
+            //
+            // }
+            $force = ! empty($question['force']);
+            foreach ($question['options'][$answer]['resources'] as $resource => $target) {
+                $this->copyResource($resource, $target, $force);
             }
 
             return true;
@@ -286,6 +291,20 @@ class OptionalPackages
         }
 
         return false;
+    }
+
+    public function addScript(array $scripts): void
+    {
+        foreach ($scripts as $event => $command) {
+            if (isset($this->composerScripts[$event])) {
+                $this->rootPackage->setScripts([$event => $command]);
+            }
+            $this->io->write(sprintf(
+                '  - Adding script <error>%s error, %s there is no </error> ()',
+                $command,
+                $event
+            ));
+        }
     }
 
     /**
@@ -520,5 +539,7 @@ class OptionalPackages
         $this->composerDevRequires = $this->rootPackage->getDevRequires();
         // Get stability flags
         $this->stabilityFlags = $this->rootPackage->getStabilityFlags();
+        // Get scripts
+        $this->composerScripts = $this->rootPackage->getScripts();
     }
 }
