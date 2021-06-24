@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types = 1);
+
 /**
  * This file is part of project hyperf-template.
  *
@@ -14,10 +15,8 @@ declare(strict_types = 1);
  */
 return [
     'default' => [
-        //		'driver' => Hyperf\Cache\Driver\RedisDriver::class,
-        'driver' => App\Driver\Cache\RedisDriver::class,
-        //		'packer' => Hyperf\Utils\Packer\PhpSerializerPacker::class,
+        'driver' => App\Kernel\Driver\Cache\RedisDriver::class,
         'packer' => App\Support\PhpSerializerPacker::class,
-        'prefix' => 'wey-activity:c:',
+        'prefix' => env('APP_NAME', 'skeleton') . ':cache:',
     ],
 ];

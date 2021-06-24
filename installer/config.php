@@ -136,25 +136,25 @@ return [
                 ],
             ],
         ],
-        'redis'         => [
-            'question'       => 'Do you want to use Redis Client ?',
-            'default'        => 'y',
-            'required'       => false,
-            'force'          => false,
-            'custom-package' => true,
-            'options'        => [
-                'y' => [
-                    'name'      => 'yes',
-                    'packages'  => [
-                        'hyperf/redis',
-                    ],
-                    'resources' => [
-                        'resources/database/redis/redis.php'         => 'config/autoload/redis.php',
-                        'resources/database/redis/BitmapService.php' => 'app/Service/BitmapService.php',
-                    ],
-                ],
-            ],
-        ],
+        // 'redis'         => [
+        //     'question'       => 'Do you want to use Redis Client ?',
+        //     'default'        => 'y',
+        //     'required'       => false,
+        //     'force'          => false,
+        //     'custom-package' => true,
+        //     'options'        => [
+        //         'y' => [
+        //             'name'      => 'yes',
+        //             'packages'  => [
+        //                 'hyperf/redis',
+        //             ],
+        //             'resources' => [
+        //                 'resources/database/redis/redis.php'         => 'config/autoload/redis.php',
+        //                 'resources/database/redis/BitmapService.php' => 'app/Service/BitmapService.php',
+        //             ],
+        //         ],
+        //     ],
+        // ],
         'async-queue'   => [
             'question'       => 'Do you want to use hyperf/async-queue component ? (A simple redis queue component)',
             'default'        => 'n',
