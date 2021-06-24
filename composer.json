@@ -32,6 +32,7 @@
         "hyperf/logger": "~2.1.0",
         "hyperf/memory": "~2.1.0",
         "hyperf/process": "~2.1.0",
+        "hyperf/redis": "^2.1",
         "hyperf/utils": "~2.1.0",
         "wilbur-yu/hyperf-opcache": "~0.0.4"
     },
