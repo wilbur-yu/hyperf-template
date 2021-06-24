@@ -271,12 +271,18 @@ class OptionalPackages
                 }
             }
             // Copy files
-            // if (isset($question['options'][$answer])) {
-            //
-            // }
-            $force = ! empty($question['force']);
-            foreach ($question['options'][$answer]['resources'] as $resource => $target) {
-                $this->copyResource($resource, $target, $force);
+            if (isset($question['options'][$answer]['resources'])) {
+                $force = ! empty($question['force']);
+                foreach ($question['options'][$answer]['resources'] as $resource => $target) {
+                    $this->copyResource($resource, $target, $force);
+                }
+            }
+
+            // Add Scripts
+            if (isset($question['options'][$answer]['commands'])) {
+                foreach ($question['options'][$answer]['commands'] as $event => $commands) {
+                    $this->addScript($event, $commands);
+                }
             }
 
             return true;
@@ -293,15 +299,14 @@ class OptionalPackages
         return false;
     }
 
-    public function addScript(array $scripts): void
+    public function addScript(string $event, array $commands): void
     {
-        foreach ($scripts as $event => $command) {
-            if (isset($this->composerScripts[$event])) {
-                $this->rootPackage->setScripts([$event => $command]);
-            }
+        if (isset($this->composerScripts[$event])) {
+            $this->rootPackage->setScripts([$event => $commands]);
+        } else {
             $this->io->write(sprintf(
                 '  - Adding script <error>%s error, %s there is no </error>',
-                implode('and', $command),
+                implode('and', $commands),
                 $event
             ));
         }
