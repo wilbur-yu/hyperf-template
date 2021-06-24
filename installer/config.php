@@ -321,6 +321,10 @@ return [
                             'php ./bin/hyperf.php gen:key',
                         ],
                     ],
+                    'tips'     => [
+                        '安装完成后请执行: php ./bin/hyperf.php vendor:publish hyperf-ext/encryption',
+                        '安装完成后请执行: php ./bin/hyperf.php gen:key',
+                    ],
                 ],
             ],
         ],
@@ -332,14 +336,17 @@ return [
             'custom-package' => true,
             'options'        => [
                 'y' => [
-                    'name'      => 'yes',
-                    'packages'  => [
+                    'name'     => 'yes',
+                    'packages' => [
                         'hyperf-ext/hashing',
                     ],
                     'commands' => [
                         'post-autoload-dump' => [
                             'php ./bin/hyperf.php vendor:publish hyperf-ext/hashing',
                         ],
+                    ],
+                    'tips'     => [
+                        '安装完成后请执行: php ./bin/hyperf.php vendor:publish hyperf-ext/hashing',
                     ],
                 ],
             ],

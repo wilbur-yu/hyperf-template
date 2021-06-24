@@ -185,7 +185,7 @@ class OptionalPackages
      * Prompt for a single optional installation package.
      *
      * @param string $questionName Name of question
-     * @param array  $question Question details from configuration
+     * @param array  $question     Question details from configuration
      *
      * @throws \Exception
      */
@@ -283,6 +283,12 @@ class OptionalPackages
                 }
             }
 
+            // Add Tips
+            if (isset($question['options'][$answer]['tips'])) {
+                foreach ($question['options'][$answer]['tips'] as $tip) {
+                    $this->addTip($tip);
+                }
+            }
             return true;
         }
         if ($question['custom-package'] === true && preg_match(self::PACKAGE_REGEX, (string) $answer, $match)) {
@@ -295,6 +301,14 @@ class OptionalPackages
         }
 
         return false;
+    }
+
+    public function addTip(string $info): void
+    {
+        $this->io->write(sprintf(
+            '  - Tips <info>%s</info>',
+            $info,
+        ));
     }
 
     public function addScript(string $event, array $commands): void
@@ -373,8 +387,8 @@ class OptionalPackages
      * Copy a file to its final destination in the skeleton.
      *
      * @param string $resource resource file
-     * @param string $target destination
-     * @param bool   $force whether or not to copy over an existing file
+     * @param string $target   destination
+     * @param bool   $force    whether or not to copy over an existing file
      */
     public function copyResource(string $resource, string $target, bool $force = false): void
     {
@@ -392,7 +406,8 @@ class OptionalPackages
             throw new RuntimeException(sprintf('Directory "%s" was not created', $destinationPath));
         }
 
-        $this->io->write(sprintf('  - Copying <info>%s</info>', $target));
+        $action = $sourceIsDir ? 'Creating' : 'Copying';
+        $this->io->write(sprintf("  - {$action} <info>%s</info>", $target));
         if ($sourceIsFile) {
             copy($this->installerSource . $resource, $this->projectRoot . $target);
         }
