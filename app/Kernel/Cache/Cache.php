@@ -12,12 +12,12 @@ declare(strict_types = 1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-namespace App\Service\Cache;
+namespace App\Kernel\Cache;
 
-use App\Contract\CacheInterface;
-use Hyperf\Cache\Cache;
+use App\Kernel\Contract\CacheInterface;
+use Hyperf\Cache\Cache as BaseCache;
 
-class CacheService extends Cache implements CacheInterface
+class Cache extends BaseCache implements CacheInterface
 {
     public function increment(string $key, int $value = 1)
     {

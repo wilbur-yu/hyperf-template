@@ -13,7 +13,7 @@ declare(strict_types = 1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 $dependencies = [
-    App\Kernel\Contract\CacheInterface::class                     => App\Service\Cache\CacheService::class,
+    App\Kernel\Contract\CacheInterface::class                     => App\Kernel\Cache\Cache::class,
     Hyperf\Contract\PackerInterface::class                        => App\Support\PhpSerializerPacker::class,
     Hyperf\Server\Listener\AfterWorkerStartListener::class        => App\Kernel\Listener\WorkerStartListener::class,
     Hyperf\Crontab\Strategy\StrategyInterface::class              => Hyperf\Crontab\Strategy\CoroutineStrategy::class,

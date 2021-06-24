@@ -15,7 +15,7 @@ declare(strict_types = 1);
  */
 return [
     'default' => [
-        'driver' => App\Kernel\Driver\Cache\RedisDriver::class,
+        'driver' => App\Kernel\Cache\Driver\RedisDriver::class,
         'packer' => App\Support\PhpSerializerPacker::class,
         'prefix' => env('APP_NAME', 'skeleton') . ':cache:',
     ],
