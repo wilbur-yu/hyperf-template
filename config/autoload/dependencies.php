@@ -13,10 +13,10 @@ declare(strict_types = 1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 $dependencies = [
-    App\Contract\CacheInterface::class                     => App\Service\Cache\CacheService::class,
-    Hyperf\Contract\PackerInterface::class                 => App\Support\PhpSerializerPacker::class,
-    Hyperf\Server\Listener\AfterWorkerStartListener::class => App\Kernel\Listener\WorkerStartListener::class,
-    Hyperf\Crontab\Strategy\StrategyInterface::class       => Hyperf\Crontab\Strategy\CoroutineStrategy::class,
+    App\Kernel\Contract\CacheInterface::class                     => App\Service\Cache\CacheService::class,
+    Hyperf\Contract\PackerInterface::class                        => App\Support\PhpSerializerPacker::class,
+    Hyperf\Server\Listener\AfterWorkerStartListener::class        => App\Kernel\Listener\WorkerStartListener::class,
+    Hyperf\Crontab\Strategy\StrategyInterface::class              => Hyperf\Crontab\Strategy\CoroutineStrategy::class,
 ];
 $appEnv       = env('APP_ENV', 'dev');
 if ($appEnv === 'prod') {
