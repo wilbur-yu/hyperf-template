@@ -12,7 +12,7 @@ declare(strict_types = 1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-use App\Contract\CacheInterface;
+use App\Kernel\Contract\CacheInterface;
 use App\Kernel\Log\Log;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\ExceptionHandler\Formatter\FormatterInterface;
@@ -310,7 +310,7 @@ if (! function_exists('cache')) {
      */
     function cache(): CacheInterface
     {
-        return container()->get(App\Contract\CacheInterface::class);
+        return container()->get(CacheInterface::class);
     }
 }
 
