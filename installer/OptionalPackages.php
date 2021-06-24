@@ -300,8 +300,8 @@ class OptionalPackages
                 $this->rootPackage->setScripts([$event => $command]);
             }
             $this->io->write(sprintf(
-                '  - Adding script <error>%s error, %s there is no </error> ()',
-                $command,
+                '  - Adding script <error>%s error, %s there is no </error>',
+                implode('and', $command),
                 $event
             ));
         }

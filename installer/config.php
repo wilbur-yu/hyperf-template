@@ -311,15 +311,15 @@ return [
             'custom-package' => true,
             'options'        => [
                 'y' => [
-                    'name'      => 'yes',
-                    'packages'  => [
+                    'name'     => 'yes',
+                    'packages' => [
                         'hyperf-ext/encryption',
                     ],
-                    'resources' => [
-                        'resources/encryption/encryption.php' => 'config/autoload/encryption.php',
-                    ],
-                    'commands'  => [
-                        'post-root-package-install' => 'php ./bin/hyperf.php gen:key',
+                    'commands' => [
+                        'post-root-package-install' => [
+                            'php ./bin/hyperf.php vendor:publish hyperf-ext/encryption',
+                            'php ./bin/hyperf.php gen:key',
+                        ],
                     ],
                 ],
             ],
@@ -336,8 +336,10 @@ return [
                     'packages'  => [
                         'hyperf-ext/hashing',
                     ],
-                    'resources' => [
-                        'resources/encryption/hashing.php' => 'config/autoload/hashing.php',
+                    'commands' => [
+                        'post-root-package-install' => [
+                            'php ./bin/hyperf.php vendor:publish hyperf-ext/hashing',
+                        ],
                     ],
                 ],
             ],
