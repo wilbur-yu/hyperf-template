@@ -307,13 +307,17 @@ return [
             'question'       => 'Do you want to use hyperf-ext/encryption component ?',
             'default'        => 'n',
             'required'       => false,
-            'force'          => false,
+            'force'          => true,
             'custom-package' => true,
             'options'        => [
                 'y' => [
-                    'name'     => 'yes',
-                    'packages' => [
+                    'name'      => 'yes',
+                    'packages'  => [
                         'hyperf-ext/encryption',
+                    ],
+                    'resources' => [
+                        'resources/encryption/Encrypter.php' => 'app/Support/Encrypter.php',
+                        'resources/encryption/HttpCode.php'  => 'app/Constants/HttpCode.php',
                     ],
                     // 'commands' => [
                     //     'post-autoload-dump' => [
@@ -321,7 +325,7 @@ return [
                     //         'php ./bin/hyperf.php gen:key',
                     //     ],
                     // ],
-                    'tips'     => [
+                    'tips'      => [
                         'The installation is complete, please run (php ./bin/hyperf.php vendor:publish hyperf-ext/encryption)',
                         'The installation is complete, please run (php ./bin/hyperf.php gen:key)',
                     ],
