@@ -58,7 +58,9 @@
             "App\\": "app/",
             "Installer\\": "installer/"
         },
-        "files": []
+        "files": [
+            "app/Support/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
@@ -90,7 +92,7 @@
             "php ./bin/hyperf.php start"
         ],
         "start-dev": [
-            "composer autoload-dump -o",
+            "composer dump-autoload -o",
             "php ./bin/hyperf.php server:watch"
         ]
     }

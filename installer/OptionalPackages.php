@@ -123,15 +123,15 @@ class OptionalPackages
         $this->installerSource = realpath(__DIR__) . '/';
     }
 
-    public function installHyperfScript()
+    public function installHyperfScript(): void
     {
         $ask[]  = "\n  <question>What time zone do you want to setup ?</question>\n";
         $ask[]  = "  [<comment>n</comment>] Default time zone for php.ini\n";
         $ask[]  = "Make your selection or type a time zone name, like Asia/Shanghai (y):\n";
-        $answer = $this->io->ask(implode('', $ask), 'y');
+        $answer = $this->io->ask(implode('', $ask), 'Asia/Shanghai');
 
         $content = file_get_contents($this->installerSource . '/resources/bin/hyperf.stub');
-        if ($answer != 'n') {
+        if ($answer !== 'n') {
             $content = str_replace('%TIME_ZONE%', $answer, $content);
             file_put_contents($this->projectRoot . '/bin/hyperf.php', $content);
         }
@@ -185,7 +185,7 @@ class OptionalPackages
      * Prompt for a single optional installation package.
      *
      * @param string $questionName Name of question
-     * @param array  $question     Question details from configuration
+     * @param array  $question Question details from configuration
      */
     public function promptForOptionalPackage(string $questionName, array $question): void
     {
@@ -223,7 +223,7 @@ class OptionalPackages
     public function removeInstallerFromDefinition(): void
     {
         $this->io->write('<info>Remove installer</info>');
-        // Remove installer script autoloading rules
+        // Remove installer script auto loading rules
         unset(
             $this->composerDefinition['autoload']['psr-4']['Installer\\'],
             $this->composerDefinition['autoload-dev']['psr-4']['InstallerTest\\'],
@@ -347,8 +347,8 @@ class OptionalPackages
      * Copy a file to its final destination in the skeleton.
      *
      * @param string $resource resource file
-     * @param string $target   destination
-     * @param bool   $force    whether or not to copy over an existing file
+     * @param string $target destination
+     * @param bool   $force whether or not to copy over an existing file
      */
     public function copyResource(string $resource, string $target, bool $force = false): void
     {
@@ -468,8 +468,6 @@ class OptionalPackages
             }
             $this->io->write('<error>Invalid answer</error>');
         }
-
-        return false;
     }
 
     /**

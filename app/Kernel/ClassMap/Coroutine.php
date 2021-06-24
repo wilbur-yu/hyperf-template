@@ -18,7 +18,7 @@ use App\Kernel\Context\Coroutine as Go;
 use Hyperf\Engine\Coroutine as Co;
 use Hyperf\Engine\Exception\CoroutineDestroyedException;
 use Hyperf\Engine\Exception\RunningInNonCoroutineException;
-
+use function di;
 class Coroutine
 {
     /**
