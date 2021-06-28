@@ -246,7 +246,7 @@ return [
             ],
         ],
         'wechat'      => [
-            'question'       => 'Do you want to use hyperf/view component ?',
+            'question'       => 'Do you want to use hyperf/wechat component ?',
             'default'        => 'n',
             'required'       => false,
             'force'          => false,
