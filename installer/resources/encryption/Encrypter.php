@@ -21,10 +21,10 @@ use HyperfExt\Encryption\Exception\DecryptException;
 
 class Encrypter
 {
-    public static function decrypt(string $payload, string $errMessage = ''): string
+    public static function decrypt(string $payload, string $errMessage = '', bool $unserialize = true): string
     {
         try {
-            return Crypt::decrypt($payload);
+            return Crypt::decrypt($payload, $unserialize);
         } catch (DecryptException $exception) {
             throw new BusinessException(HttpCode::CRYPT_DECRYPT_ERROR, $errMessage);
         }
