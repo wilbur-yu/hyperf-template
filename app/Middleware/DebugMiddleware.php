@@ -20,6 +20,7 @@ use Hyperf\HttpServer\Request;
 use Hyperf\Utils\Codec\Json;
 use Hyperf\Utils\Context;
 use Hyperf\Utils\Coroutine;
+use Hyperf\Utils\Str;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -114,6 +115,7 @@ class DebugMiddleware implements MiddlewareInterface
             'Authorization',
             'x-real-ip',
             'x-forwarded-for',
+            'cookie',
         ];
         $logHeaders     = [];
         foreach ($onlyHeaderKeys as $value) {
@@ -127,8 +129,23 @@ class DebugMiddleware implements MiddlewareInterface
 
     protected function getResponseString(ResponseInterface $response): string
     {
-        if (in_array('text/html', $response->getHeader('content-type'), true)) {
-            return 'view';
+        $contentType = [
+            'text/html'                => 'html',
+            'image/x-icon'             => 'icon',
+            'application/x-javascript' => 'js',
+            'text/css'                 => 'css',
+            'image/svg'                => 'svg',
+            'image/jpeg'               => 'jpg',
+            'image/webp'               => 'png',
+            'image/png'                => 'png',
+            'image/gif'                => 'gif',
+            'image/bmp'                => 'bmp',
+        ];
+        $type        = $response->getHeaderLine('content-type');
+        foreach ($contentType as $k => $v) {
+            if (Str::startsWith($type, $k)) {
+                return $v;
+            }
         }
 
         return (string) $response->getBody();
