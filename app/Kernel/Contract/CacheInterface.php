@@ -14,7 +14,7 @@ declare(strict_types = 1);
  */
 namespace App\Kernel\Contract;
 
-interface CacheInterface
+interface CacheInterface extends \Psr\SimpleCache\CacheInterface
 {
     public function increment(string $key, int $value = 1);
 

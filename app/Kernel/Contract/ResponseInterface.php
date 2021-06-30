@@ -15,9 +15,10 @@ declare(strict_types = 1);
 namespace App\Kernel\Contract;
 
 use App\Constants\HttpCode;
+use Hyperf\HttpServer\Contract\ResponseInterface as BaseResponseInterface;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
-interface ResponseInterface
+interface ResponseInterface extends BaseResponseInterface, PsrResponseInterface
 {
     public function success(
         array $data = [],
