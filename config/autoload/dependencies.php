@@ -14,12 +14,13 @@ declare(strict_types = 1);
  */
 $dependencies = [
     Hyperf\HttpServer\Contract\ResponseInterface::class    => App\Kernel\Server\Response::class,
+    Psr\Http\Message\ResponseInterface::class              => App\Kernel\Server\Response::class,
     App\Kernel\Contract\ResponseInterface::class           => App\Kernel\Server\Response::class,
     App\Kernel\Contract\CacheInterface::class              => App\Kernel\Cache\Cache::class,
     Psr\SimpleCache\CacheInterface::class                  => App\Kernel\Cache\Cache::class,
     Hyperf\Contract\PackerInterface::class                 => App\Kernel\Utils\Packer\PhpSerializerPacker::class,
     Hyperf\Server\Listener\AfterWorkerStartListener::class => App\Kernel\Listener\WorkerStartListener::class,
-    Hyperf\Crontab\Strategy\StrategyInterface::class       => Hyperf\Crontab\Strategy\CoroutineStrategy::class,
+    // Hyperf\Crontab\Strategy\StrategyInterface::class       => Hyperf\Crontab\Strategy\CoroutineStrategy::class,
 ];
 $appEnv       = env('APP_ENV', 'dev');
 if ($appEnv === 'prod') {

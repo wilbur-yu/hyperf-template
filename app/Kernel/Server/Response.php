@@ -17,6 +17,8 @@ namespace App\Kernel\Server;
 use App\Constants\HttpCode;
 use App\Kernel\Contract\ResponseInterface;
 use App\Kernel\Log\AppendRequestProcessor;
+use Hyperf\HttpMessage\Cookie\Cookie;
+use Hyperf\HttpMessage\Exception\HttpException;
 use Hyperf\HttpMessage\Stream\SwooleStream;
 use Hyperf\HttpServer\Response as BaseResponse;
 use Hyperf\Utils\Context;
@@ -54,6 +56,42 @@ class Response extends BaseResponse implements ResponseInterface
         return $this->json($data);
     }
 
+    public function cookie(
+        string $name,
+        string $value = '',
+        $expire = 0,
+        string $path = '/',
+        string $domain = '',
+        bool $secure = false,
+        bool $httpOnly = true,
+        bool $raw = false,
+        ?string $sameSite = null
+    ): self {
+        $cookie   = new Cookie(
+            $name,
+            $value,
+            $expire,
+            $path,
+            $domain,
+            $secure,
+            $httpOnly,
+            $raw,
+            $sameSite
+        );
+        $response = $this->getResponse()->withCookie($cookie);
+        Context::set(ResponseInterface::class, $response);
+
+        return $this;
+    }
+
+    public function handleException(HttpException $throwable): PsrResponseInterface
+    {
+        return $this->getResponse()
+            ->withAddedHeader('Server', config('app_name'))
+            ->withStatus($throwable->getStatusCode())
+            ->withBody(new SwooleStream($throwable->getMessage()));
+    }
+
     protected function formatting(int $code, string $message, $data = [], $errors = []): PsrResponseInterface
     {
         $body = [
@@ -81,6 +119,7 @@ class Response extends BaseResponse implements ResponseInterface
         foreach ($headers as $key => $value) {
             $response = $response->withHeader($key, $value);
         }
+        Context::set(ResponseInterface::class, $response);
 
         return $response;
     }

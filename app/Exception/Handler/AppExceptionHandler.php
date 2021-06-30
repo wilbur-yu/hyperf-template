@@ -14,34 +14,64 @@ declare(strict_types = 1);
  */
 namespace App\Exception\Handler;
 
-use Hyperf\Contract\StdoutLoggerInterface;
+use App\Constants\HttpCode;
+use App\Exception\BusinessException;
+use Hyperf\Di\Annotation\Inject;
 use Hyperf\ExceptionHandler\ExceptionHandler;
+use Hyperf\HttpMessage\Exception\HttpException;
 use Hyperf\HttpMessage\Stream\SwooleStream;
+use Hyperf\Utils\Arr;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
 
 class AppExceptionHandler extends ExceptionHandler
 {
-    /**
-     * @var StdoutLoggerInterface
-     */
-    protected $logger;
-
-    public function __construct(StdoutLoggerInterface $logger)
+    public function handle(Throwable $throwable, ResponseInterface $response): ResponseInterface
     {
-        $this->logger = $logger;
-    }
+        $newResponse = app()->get(\App\Kernel\Contract\ResponseInterface::class);
+        $this->stopPropagation();
 
-    public function handle(Throwable $throwable, ResponseInterface $response)
-    {
-        $this->logger->error(sprintf('%s[%s] in %s', $throwable->getMessage(), $throwable->getLine(), $throwable->getFile()));
-        $this->logger->error($throwable->getTraceAsString());
+        if ($throwable instanceof HttpException) {
+            return $newResponse->handleException($throwable);
+        }
 
-        return $response->withHeader('Server', 'Hyperf')->withStatus(500)->withBody(new SwooleStream('Internal Server Error.'));
+        if ($throwable instanceof BusinessException) {
+            return $newResponse->fail(
+                $throwable->getCode(),
+                $throwable->getMessage(),
+                $this->convertExceptionToArray($throwable)
+            );
+        }
+
+        return $newResponse->fail(
+            HttpCode::SERVER_ERROR,
+            $throwable->getMessage(),
+            $this->convertExceptionToArray($throwable)
+        );
     }
 
     public function isValid(Throwable $throwable): bool
     {
         return true;
+    }
+
+    protected function convertExceptionToArray(Throwable $throwable): array
+    {
+        return config('app_debug', false) ? [
+            'message'   => $throwable->getMessage(),
+            'exception' => get_class($throwable),
+            'file'      => $throwable->getFile(),
+            'line'      => $throwable->getLine(),
+            'trace'     => collect($throwable->getTrace())->map(function ($trace) {
+                return Arr::except($trace, ['args']);
+            })->all(),
+        ] : [
+            'message' => $this->isHttpException($throwable) ? $throwable->getMessage() : 'Server Error',
+        ];
+    }
+
+    protected function isHttpException(Throwable $e): bool
+    {
+        return $e instanceof HttpException;
     }
 }

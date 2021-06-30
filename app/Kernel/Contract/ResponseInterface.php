@@ -27,4 +27,15 @@ interface ResponseInterface extends BaseResponseInterface, PsrResponseInterface
     ): PsrResponseInterface;
 
     public function fail(int $code, string $message = '', array $errors = []): PsrResponseInterface;
+    public function cookie(
+        string $name,
+        string $value = '',
+        $expire = 0,
+        string $path = '/',
+        string $domain = '',
+        bool $secure = false,
+        bool $httpOnly = true,
+        bool $raw = false,
+        ?string $sameSite = null
+    ): self;
 }
