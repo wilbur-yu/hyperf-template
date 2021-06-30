@@ -16,10 +16,8 @@ namespace App\Exception\Handler;
 
 use App\Constants\HttpCode;
 use App\Exception\BusinessException;
-use Hyperf\Di\Annotation\Inject;
 use Hyperf\ExceptionHandler\ExceptionHandler;
 use Hyperf\HttpMessage\Exception\HttpException;
-use Hyperf\HttpMessage\Stream\SwooleStream;
 use Hyperf\Utils\Arr;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
@@ -29,7 +27,6 @@ class AppExceptionHandler extends ExceptionHandler
     public function handle(Throwable $throwable, ResponseInterface $response): ResponseInterface
     {
         $newResponse = app()->get(\App\Kernel\Contract\ResponseInterface::class);
-        $this->stopPropagation();
 
         if ($throwable instanceof HttpException) {
             return $newResponse->handleException($throwable);
@@ -42,6 +39,7 @@ class AppExceptionHandler extends ExceptionHandler
                 $this->convertExceptionToArray($throwable)
             );
         }
+        $this->stopPropagation();
 
         return $newResponse->fail(
             HttpCode::SERVER_ERROR,
