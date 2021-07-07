@@ -25,6 +25,8 @@ use Hyperf\Di\Annotation\Inject;
 use Hyperf\Guzzle\CoroutineHandler;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
+use Symfony\Component\HttpFoundation\HeaderBag;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class WechatFactory.
@@ -76,12 +78,35 @@ class WechatFactory
         $app['cache'] = $this->container->get(CacheInterface::class);
 
         // 如果使用的是 OfficialAccount，则还需要设置以下参数
-        if ($service === 'official_account') {
+        if ($app instanceof \EasyWeChat\OfficialAccount\Application) {
             $app->oauth->setGuzzleOptions([
                 'http_errors' => false,
                 'handler'     => $stack,
             ]);
         }
+
+        $get         = $this->request->getQueryParams();
+        $post        = $this->request->getParsedBody();
+        $cookie      = $this->request->getCookieParams();
+        $uploadFiles = $this->request->getUploadedFiles() ?? [];
+        $server      = $this->request->getServerParams();
+        $xml         = $this->request->getBody()->getContents();
+        $files       = [];
+        /** @var \Hyperf\HttpMessage\Upload\UploadedFile $v */
+        foreach ($uploadFiles as $k => $v) {
+            $files[$k] = $v->toArray();
+        }
+        $request          = new Request(
+            $get,
+            $post,
+            [],
+            $cookie,
+            $files,
+            $server,
+            $xml
+        );
+        $request->headers = new HeaderBag($this->request->getHeaders());
+        $app->rebind('request', $request);
 
         $app->rebind('cache', cache());
 
