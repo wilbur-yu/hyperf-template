@@ -146,25 +146,6 @@ return [
                 ],
             ],
         ],
-        // 'redis'         => [
-        //     'question'       => 'Do you want to use Redis Client ?',
-        //     'default'        => 'y',
-        //     'required'       => false,
-        //     'force'          => false,
-        //     'custom-package' => true,
-        //     'options'        => [
-        //         'y' => [
-        //             'name'      => 'yes',
-        //             'packages'  => [
-        //                 'hyperf/redis',
-        //             ],
-        //             'resources' => [
-        //                 'resources/database/redis/redis.php'         => 'config/autoload/redis.php',
-        //                 'resources/database/redis/BitmapService.php' => 'app/Service/BitmapService.php',
-        //             ],
-        //         ],
-        //     ],
-        // ],
         'async-queue' => [
             'question'       => 'Do you want to use hyperf/async-queue component ? (A simple redis queue component)',
             'default'        => 'n',
@@ -246,7 +227,7 @@ return [
             ],
         ],
         'wechat'      => [
-            'question'       => 'Do you want to use hyperf/wechat component ?',
+            'question'       => 'Do you want to use overtrue/wechat component ?',
             'default'        => 'n',
             'required'       => false,
             'force'          => false,
@@ -355,24 +336,5 @@ return [
                 ],
             ],
         ],
-        // 'constants'     => [
-        //     'question'       => 'Do you want to use hyperf/constants component ?',
-        //     'default'        => 'y',
-        //     'required'       => false,
-        //     'force'          => true,
-        //     'custom-package' => false,
-        //     'options'        => [
-        //         'y' => [
-        //             'name'      => 'yes',
-        //             'packages'  => [
-        //                 'hyperf/constants',
-        //             ],
-        //             'resources' => [
-        //                 'resources/constants/ErrorCode.php'         => 'app/Constants/ErrorCode.php',
-        //                 'resources/constants/BusinessException.php' => 'app/Exception/BusinessException.php',
-        //             ],
-        //         ],
-        //     ],
-        // ],
     ],
 ];
