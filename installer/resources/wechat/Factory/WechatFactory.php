@@ -23,6 +23,7 @@ use GuzzleHttp\HandlerStack;
 use Hyperf\Config\Annotation\Value;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\Guzzle\CoroutineHandler;
+use Hyperf\HttpServer\Contract\RequestInterface;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\HttpFoundation\HeaderBag;
@@ -46,6 +47,12 @@ class WechatFactory
      * @Value("wechat")
      */
     protected array $config;
+
+    /**
+     * @Inject
+     * @var \Hyperf\HttpServer\Contract\RequestInterface
+     */
+    protected RequestInterface $request;
 
     /**
      * @Inject
