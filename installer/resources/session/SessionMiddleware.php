@@ -30,12 +30,12 @@ class SessionMiddleware implements MiddlewareInterface
     /**
      * @var SessionManager
      */
-    private $sessionManager;
+    private SessionManager $sessionManager;
 
     /**
      * @var ConfigInterface
      */
-    private $config;
+    private ConfigInterface $config;
 
     public function __construct(SessionManager $sessionManager, ConfigInterface $config)
     {

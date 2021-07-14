@@ -14,13 +14,10 @@ declare(strict_types = 1);
  */
 namespace App\Resource;
 
-use App\Support\Traits\Encrypter;
 use Hyperf\Resource\Json\JsonResource;
 
 class Resource extends JsonResource
 {
-    use Encrypter;
-
     protected array $withoutFields = [];
 
     public static function collection($resource): CustomResourceCollection
