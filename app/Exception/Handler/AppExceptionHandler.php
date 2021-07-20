@@ -6,6 +6,7 @@ declare(strict_types = 1);
  *
  * @author   wenber.yu@creative-life.club
  * @link     https://github.com/wilbur-yu/hyperf-template
+ *
  * @link     https://www.hyperf.io
  * @document https://hyperf.wiki
  * @contact  group@hyperf.io
@@ -28,15 +29,12 @@ class AppExceptionHandler extends ExceptionHandler
 {
     protected ResponseInterface $response;
 
-    protected ContainerInterface $container;
-
-    public function __construct(ContainerInterface $container)
+    public function __construct(ContainerInterface $container, )
     {
-        $this->container = $container;
-        $this->response  = $container->get(ResponseInterface::class);
+        $this->response = $container->get(ResponseInterface::class);
     }
 
-    public function handle(Throwable $throwable, BaseResponseInterface $response): ResponseInterface
+    public function handle(Throwable $throwable, BaseResponseInterface $response): BaseResponseInterface
     {
         switch (true) {
             case $throwable instanceof HttpException:

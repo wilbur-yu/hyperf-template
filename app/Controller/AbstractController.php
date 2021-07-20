@@ -21,24 +21,12 @@ use Psr\Container\ContainerInterface;
 
 abstract class AbstractController
 {
-    /**
-     * @Inject
-     *
-     * @var ContainerInterface
-     */
+    #[Inject]
     protected ContainerInterface $container;
 
-    /**
-     * @Inject
-     *
-     * @var RequestInterface
-     */
+    #[Inject]
     protected RequestInterface $request;
 
-    /**
-     * @Inject
-     *
-     * @var ResponseInterface
-     */
+    #[Inject]
     protected ResponseInterface $response;
 }

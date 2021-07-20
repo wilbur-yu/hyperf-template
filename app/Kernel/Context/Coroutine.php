@@ -6,7 +6,6 @@ declare(strict_types = 1);
  *
  * @author   wenber.yu@creative-life.club
  * @link     https://github.com/wilbur-yu/hyperf-template
- *
  * @link     https://www.hyperf.io
  * @document https://hyperf.wiki
  * @contact  group@hyperf.io
@@ -24,19 +23,10 @@ use Throwable;
 
 class Coroutine
 {
-    /**
-     * @var ContainerInterface
-     */
-    protected ContainerInterface $container;
-
-    /**
-     * @var StdoutLoggerInterface
-     */
-    protected $logger;
+    protected StdoutLoggerInterface $logger;
 
     public function __construct(ContainerInterface $container)
     {
-        $this->container = $container;
         $this->logger    = $container->get(StdoutLoggerInterface::class);
     }
 

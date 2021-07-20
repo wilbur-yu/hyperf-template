@@ -136,26 +136,12 @@ class StdoutLogger implements StdoutLoggerInterface
 
     protected function getMessage(string $message, array $tags, string $level = LogLevel::INFO): string
     {
-        switch ($level) {
-            case LogLevel::EMERGENCY:
-            case LogLevel::ALERT:
-            case LogLevel::CRITICAL:
-                $tag = 'error';
-
-                break;
-            case LogLevel::ERROR:
-                $tag = 'fg=red';
-
-                break;
-            case LogLevel::WARNING:
-            case LogLevel::NOTICE:
-                $tag = 'comment';
-
-                break;
-            case LogLevel::INFO:
-            default:
-                $tag = 'info';
-        }
+        $tag = match ($level) {
+            LogLevel::EMERGENCY, LogLevel::ALERT, LogLevel::CRITICAL => 'error',
+            LogLevel::ERROR => 'fg=red',
+            LogLevel::WARNING, LogLevel::NOTICE => 'comment',
+            default => 'info',
+        };
 
         $template     = sprintf('<%s>[%s]</>', $tag, strtoupper($level));
         $implodedTags = '';
