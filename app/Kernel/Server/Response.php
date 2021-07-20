@@ -87,7 +87,7 @@ class Response extends BaseResponse implements ResponseInterface
     public function handleException(HttpException $throwable): PsrResponseInterface
     {
         return $this->getResponse()
-            ->withAddedHeader('Server', config('app_name'))
+            ?->withAddedHeader('Server', config('app_name'))
             ->withStatus($throwable->getStatusCode())
             ->withBody(new SwooleStream($throwable->getMessage()));
     }
@@ -117,7 +117,7 @@ class Response extends BaseResponse implements ResponseInterface
 
         $response = $this->getResponse();
         foreach ($headers as $key => $value) {
-            $response = $response->withHeader($key, $value);
+            $response = $response?->withHeader($key, $value);
         }
         Context::set(ResponseInterface::class, $response);
 

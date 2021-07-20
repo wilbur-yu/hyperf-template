@@ -6,7 +6,6 @@ declare(strict_types = 1);
  *
  * @author   wenber.yu@creative-life.club
  * @link     https://github.com/wilbur-yu/hyperf-template
- *
  * @link     https://www.hyperf.io
  * @document https://hyperf.wiki
  * @contact  group@hyperf.io
@@ -14,19 +13,18 @@ declare(strict_types = 1);
  */
 namespace App\Controller;
 
-use Hyperf\Di\Annotation\Inject;
-use Hyperf\HttpServer\Contract\RequestInterface;
 use App\Kernel\Contract\ResponseInterface;
+use Hyperf\HttpServer\Contract\RequestInterface;
 use Psr\Container\ContainerInterface;
 
 abstract class AbstractController
 {
-    #[Inject]
-    protected ContainerInterface $container;
-
-    #[Inject]
-    protected RequestInterface $request;
-
-    #[Inject]
+    protected RequestInterface  $request;
     protected ResponseInterface $response;
+
+    public function __construct(protected ContainerInterface $container)
+    {
+        $this->response = $container->get(ResponseInterface::class);
+        $this->request  = $container->get(RequestInterface::class);
+    }
 }
