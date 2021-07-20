@@ -31,9 +31,6 @@ use function microtime;
 
 class DebugMiddleware implements MiddlewareInterface
 {
-    /**
-     * @var ContainerInterface
-     */
     protected ContainerInterface $container;
 
     public function __construct(ContainerInterface $container)
@@ -46,7 +43,6 @@ class DebugMiddleware implements MiddlewareInterface
      * @param \Psr\Http\Server\RequestHandlerInterface $handler
      *
      * @throws \Throwable
-     *
      * @return \Psr\Http\Message\ResponseInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

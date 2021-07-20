@@ -23,9 +23,6 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class CorsMiddleware implements MiddlewareInterface
 {
-    /**
-     * @var ContainerInterface
-     */
     protected ContainerInterface $container;
 
     public function __construct(ContainerInterface $container)

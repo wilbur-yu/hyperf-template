@@ -1,17 +1,18 @@
 <?php
 
 declare(strict_types = 1);
+
 /**
  * This file is part of project hyperf-template.
  *
  * @author   wenber.yu@creative-life.club
  * @link     https://github.com/wilbur-yu/hyperf-template
- *
  * @link     https://www.hyperf.io
  * @document https://hyperf.wiki
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 use App\Kernel\Contract\CacheInterface;
 use App\Kernel\Contract\ResponseInterface;
 use App\Kernel\Log\Log;
@@ -23,6 +24,7 @@ use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Str;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+use Swoole\Server;
 use Swoole\WebSocket\Frame;
 
 if (! function_exists('format_duration')) {
@@ -52,18 +54,18 @@ if (! function_exists('hide_str')) {
      * 将一个字符串部分字符用$re替代隐藏.
      *
      * @param null|string $string 待处理的字符串
-     * @param int         $start  规定在字符串的何处开始，
+     * @param int         $start 规定在字符串的何处开始，
      *                            正数 - 在字符串的指定位置开始
      *                            负数 - 在从字符串结尾的指定位置开始
      *                            0 - 在字符串中的第一个字符处开始
      * @param int         $length 可选。规定要隐藏的字符串长度。默认是直到字符串的结尾。
      *                            正数 - 从 start 参数所在的位置隐藏
      *                            负数 - 从字符串末端隐藏
-     * @param string      $re     替代符
+     * @param string      $re 替代符
      *
-     * @return string 处理后的字符串
+     * @return bool|string 处理后的字符串
      */
-    function hide_str(?string $string, int $start = 0, int $length = 0, string $re = '*')
+    function hide_str(?string $string, int $start = 0, int $length = 0, string $re = '*'): bool|string
     {
         if (empty($string)) {
             return '';
@@ -96,33 +98,16 @@ if (! function_exists('hide_str')) {
 }
 
 if (! function_exists('app')) {
-    /**
-     * Finds an entry of the container by its identifier and returns it.
-     *
-     * @param null|string $id
-     *
-     * @return mixed|\Psr\Container\ContainerInterface
-     */
-    function app(?string $id = null)
+    function app(): ContainerInterface
     {
-        $container = container();
-        if ($id) {
-            return $container->get($id);
-        }
-
-        return $container;
+        return container();
     }
 }
 
 if (! function_exists('di')) {
-    function di($id = null)
+    function di(): ContainerInterface
     {
-        $container = container();
-        if ($id) {
-            return $container->get($id);
-        }
-
-        return $container;
+        return container();
     }
 }
 
@@ -163,14 +148,14 @@ if (! function_exists('throw_if')) {
      * @license https://github.com/laravel/framework
      * Throw the given exception if the given condition is true.
      *
+     * @param bool              $condition
      * @param string|\Throwable $exception
      * @param array             ...$parameters
      *
      * @throws \Throwable
-     *
-     * @return bool
+     * @return null|bool
      */
-    function throw_if(bool $condition, $exception, ...$parameters): ?bool
+    function throw_if(bool $condition, Throwable|string $exception, ...$parameters): ?bool
     {
         if ($condition) {
             throw (is_string($exception) ? new $exception(...$parameters) : $exception);
@@ -190,10 +175,9 @@ if (! function_exists('throw_unless')) {
      * @param array             ...$parameters
      *
      * @throws \Throwable
-     *
      * @return bool
      */
-    function throw_unless(bool $condition, $exception, ...$parameters): bool
+    function throw_unless(bool $condition, Throwable|string $exception, ...$parameters): bool
     {
         if (! $condition) {
             throw (is_string($exception) ? new $exception(...$parameters) : $exception);
@@ -210,7 +194,7 @@ if (! function_exists('server')) {
     /**
      * @return \Swoole\Coroutine\Server|\Swoole\Server
      */
-    function server()
+    function server(): Server|\Swoole\Coroutine\Server
     {
         return container()->get(ServerFactory::class)->getServer()->getServer();
     }
@@ -327,8 +311,10 @@ if (! function_exists('blank')) {
      * Determine if the given value is "blank".
      *
      * @param mixed $value
+     *
+     * @return bool
      */
-    function blank($value): bool
+    function blank(mixed $value): bool
     {
         if (is_null($value)) {
             return true;
@@ -356,8 +342,10 @@ if (! function_exists('filled')) {
      * Determine if a value is "filled".
      *
      * @param mixed $value
+     *
+     * @return bool
      */
-    function filled($value): bool
+    function filled(mixed $value): bool
     {
         return ! blank($value);
     }
@@ -373,10 +361,9 @@ if (! function_exists('retry')) {
      * @param null|callable $when
      *
      * @throws \Exception
-     *
      * @return mixed
      */
-    function retry(int $times, callable $callback, int $sleep = 0, callable $when = null)
+    function retry(int $times, callable $callback, int $sleep = 0, callable $when = null): mixed
     {
         $attempts = 0;
 
@@ -405,11 +392,12 @@ if (! function_exists('with')) {
      * @license https://github.com/laravel/framework
      * Return the given value, optionally passed through the given callback.
      *
-     * @param mixed $value
+     * @param mixed         $value
+     * @param null|callable $callback
      *
      * @return mixed
      */
-    function with($value, callable $callback = null)
+    function with(mixed $value, callable $callback = null): mixed
     {
         return is_null($callback) ? $value : $callback($value);
     }

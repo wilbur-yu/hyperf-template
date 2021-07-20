@@ -28,6 +28,5 @@ class HttpCode extends AbstractConstants
      * @Message("Server Error！")
      */
     public const SERVER_ERROR = 500;
-
     public const HTTP_OK      = 200;
 }

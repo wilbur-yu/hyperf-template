@@ -6,7 +6,6 @@ declare(strict_types = 1);
  *
  * @author   wenber.yu@creative-life.club
  * @link     https://github.com/wilbur-yu/hyperf-template
- *
  * @link     https://www.hyperf.io
  * @document https://hyperf.wiki
  * @contact  group@hyperf.io
@@ -23,15 +22,10 @@ use Hyperf\Utils\Str;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 
-/**
- * @Listener
- */
+#[Listener]
 class DbQueryExecutedListener implements ListenerInterface
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private LoggerInterface $logger;
 
     public function __construct(ContainerInterface $container)
     {
@@ -45,10 +39,7 @@ class DbQueryExecutedListener implements ListenerInterface
         ];
     }
 
-    /**
-     * @param QueryExecuted $event
-     */
-    public function process(object $event)
+    public function process(object $event): void
     {
         if ($event instanceof QueryExecuted) {
             $sql = $event->sql;
