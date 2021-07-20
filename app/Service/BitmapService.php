@@ -34,7 +34,7 @@ class BitmapService
      */
     public function __construct(string $keyPrefix = 'user:signing', string $keyCarbonFormat = '')
     {
-        $this->redis = redis();
+        $this->redis = app()->get(Redis::class);
         $this->key   = config('cache.default.prefix') . ':' . $keyPrefix .
                        (empty($keyCarbonFormat) ? '' : ':' . Carbon::now()->format($keyCarbonFormat));
     }
