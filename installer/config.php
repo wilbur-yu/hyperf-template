@@ -17,82 +17,82 @@ $timestamp = date('Y_m_d_His');
 return [
     'packages'    => [
         'hyperf/amqp'               => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/async-queue'        => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/database'           => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/db-connection'      => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/model-cache'        => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/constants'          => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/json-rpc'           => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/redis'              => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/rpc'                => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/rpc-client'         => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/rpc-server'         => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/grpc-client'        => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/grpc-server'        => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/elasticsearch'      => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/config-apollo'      => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/config-aliyun-acm'  => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/config-etcd'        => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/tracer'             => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/service-governance' => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/validation'         => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/session'            => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/view'               => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/view-engine'        => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/task'               => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'hyperf/resource'           => [
-            'version' => '~2.1.0',
+            'version' => '~2.2.0',
         ],
         'overtrue/wechat'           => [
-            'version' => '^5.5',
+            'version' => '^5.7',
         ],
         'wilbur-yu/hyperf-options'  => [
             'version' => '^0.1',
