@@ -6,7 +6,6 @@ declare(strict_types = 1);
  *
  * @author   wenber.yu@creative-life.club
  * @link     https://github.com/wilbur-yu/hyperf-template
- *
  * @link     https://www.hyperf.io
  * @document https://hyperf.wiki
  * @contact  group@hyperf.io
@@ -16,32 +15,44 @@ namespace App\Exception\Handler;
 
 use App\Constants\HttpCode;
 use App\Exception\BusinessException;
+use App\Kernel\Contract\ResponseInterface;
+use Hyperf\Di\Exception\CircularDependencyException;
 use Hyperf\ExceptionHandler\ExceptionHandler;
 use Hyperf\HttpMessage\Exception\HttpException;
 use Hyperf\Utils\Arr;
-use Psr\Http\Message\ResponseInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface as BaseResponseInterface;
 use Throwable;
 
 class AppExceptionHandler extends ExceptionHandler
 {
-    public function handle(Throwable $throwable, ResponseInterface $response): ResponseInterface
+    protected ResponseInterface $response;
+
+    protected ContainerInterface $container;
+
+    public function __construct(ContainerInterface $container)
     {
-        $newResponse = app()->get(\App\Kernel\Contract\ResponseInterface::class);
+        $this->container = $container;
+        $this->response  = $container->get(ResponseInterface::class);
+    }
 
-        if ($throwable instanceof HttpException) {
-            return $newResponse->handleException($throwable);
-        }
-
-        if ($throwable instanceof BusinessException) {
-            return $newResponse->fail(
-                $throwable->getCode(),
-                $throwable->getMessage(),
-                $this->convertExceptionToArray($throwable)
-            );
+    public function handle(Throwable $throwable, BaseResponseInterface $response): ResponseInterface
+    {
+        switch (true) {
+            case $throwable instanceof HttpException:
+                return $this->response->handleException($throwable);
+            case $throwable instanceof BusinessException:
+                return $this->response->fail(
+                    $throwable->getCode(),
+                    $throwable->getMessage(),
+                    $this->convertExceptionToArray($throwable)
+                );
+            case $throwable instanceof CircularDependencyException:
+                return $this->response->fail(HttpCode::SERVER_ERROR, $throwable->getMessage());
         }
         $this->stopPropagation();
 
-        return $newResponse->fail(
+        return $this->response->fail(
             HttpCode::SERVER_ERROR,
             $throwable->getMessage(),
             $this->convertExceptionToArray($throwable)
