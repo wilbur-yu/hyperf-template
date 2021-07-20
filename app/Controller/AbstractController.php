@@ -16,7 +16,7 @@ namespace App\Controller;
 
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Contract\RequestInterface;
-use Hyperf\HttpServer\Contract\ResponseInterface;
+use App\Kernel\Contract\ResponseInterface;
 use Psr\Container\ContainerInterface;
 
 abstract class AbstractController
