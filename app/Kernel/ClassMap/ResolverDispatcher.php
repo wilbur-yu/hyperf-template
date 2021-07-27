@@ -6,6 +6,7 @@ declare(strict_types = 1);
  *
  * @author   wenber.yu@creative-life.club
  * @link     https://github.com/wilbur-yu/hyperf-template
+ *
  * @link     https://www.hyperf.io
  * @document https://hyperf.wiki
  * @contact  group@hyperf.io
@@ -23,11 +24,20 @@ use RuntimeException;
 
 class ResolverDispatcher implements ResolverInterface
 {
-    protected ?ObjectResolver $objectResolver;
+    /**
+     * @var null|ObjectResolver
+     */
+    protected $objectResolver;
 
-    protected ?FactoryResolver $factoryResolver;
+    /**
+     * @var null|FactoryResolver
+     */
+    protected $factoryResolver;
 
-    private ContainerInterface $container;
+    /**
+     * @var \Psr\Container\ContainerInterface
+     */
+    private $container;
 
     public function __construct(ContainerInterface $container)
     {
@@ -41,9 +51,10 @@ class ResolverDispatcher implements ResolverInterface
      * @param array               $parameters optional parameters to use to build the entry
      *
      * @throws InvalidDefinitionException if the definition cannot be resolved
+     *
      * @return mixed value obtained from the definition
      */
-    public function resolve(DefinitionInterface $definition, array $parameters = []): mixed
+    public function resolve(DefinitionInterface $definition, array $parameters = [])
     {
         if ($definition instanceof SelfResolvingDefinitionInterface) {
             return $definition->resolve($this->container);
@@ -92,9 +103,7 @@ class ResolverDispatcher implements ResolverInterface
 
                 return $this->factoryResolver;
             default:
-                throw new RuntimeException(
-                    'No definition resolver was configured for definition of type ' . get_class($definition)
-                );
+                throw new RuntimeException('No definition resolver was configured for definition of type ' . get_class($definition));
         }
     }
 }
