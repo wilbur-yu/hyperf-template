@@ -20,9 +20,10 @@ use Psr\Log\LogLevel;
 return [
     'app_name'                   => env('APP_NAME', 'skeleton'),
     'app_env'                    => env('APP_ENV', 'dev'),
+    'app_url'                    => env('APP_URL', 'https://localhost'),
     'scan_cacheable'             => env('SCAN_CACHEABLE', false),
     'app_response_headers'       => [
-        'author'       => 'wenber.yu@creative-life.club',
+        'author'       => 'wenbo@wenber.club',
         'content-type' => 'application/json; charset=utf-8',
     ],
     StdoutLoggerInterface::class => [
