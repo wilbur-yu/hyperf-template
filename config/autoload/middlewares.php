@@ -1,6 +1,7 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
+
 /**
  * This file is part of project hyperf-template.
  *
@@ -12,11 +13,14 @@ declare(strict_types = 1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 use App\Middleware\CorsMiddleware;
 use App\Middleware\DebugMiddleware;
+use App\Middleware\WithRequestSchemeMiddleware;
 
 return [
     'http' => [
+        WithRequestSchemeMiddleware::class,
         DebugMiddleware::class,
         CorsMiddleware::class,
     ],
