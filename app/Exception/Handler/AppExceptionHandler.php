@@ -29,7 +29,7 @@ class AppExceptionHandler extends ExceptionHandler
 {
     protected ResponseInterface $response;
 
-    public function __construct(ContainerInterface $container, )
+    public function __construct(ContainerInterface $container)
     {
         $this->response = $container->get(ResponseInterface::class);
     }
@@ -43,6 +43,7 @@ class AppExceptionHandler extends ExceptionHandler
                 return $this->response->fail(
                     $throwable->getCode(),
                     $throwable->getMessage(),
+                    HttpCode::HTTP_OK,
                     $this->convertExceptionToArray($throwable)
                 );
             case $throwable instanceof CircularDependencyException:
@@ -53,6 +54,7 @@ class AppExceptionHandler extends ExceptionHandler
         return $this->response->fail(
             HttpCode::SERVER_ERROR,
             $throwable->getMessage(),
+            HttpCode::HTTP_OK,
             $this->convertExceptionToArray($throwable)
         );
     }

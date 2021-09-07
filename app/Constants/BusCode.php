@@ -21,10 +21,12 @@ use phpDocumentor\Reflection\Types\Context;
  * @method static getMessage(int $code)
  */
 #[Constants]
-class SysCode extends AbstractConstants
+class BusCode extends AbstractConstants
 {
     /**
      * @Message("容器内未找到")
      */
     public const APP_GET_NOT_FOUND_ERROR = 5001;
+
+    public const SUCCESS = 200;
 }

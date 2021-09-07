@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 /**
  * This file is part of project hyperf-template.
  *
@@ -12,8 +12,10 @@ declare(strict_types = 1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace App\Kernel\Server;
 
+use App\Constants\BusCode;
 use App\Constants\HttpCode;
 use App\Kernel\Contract\ResponseInterface;
 use App\Kernel\Log\AppendRequestProcessor;
@@ -26,10 +28,6 @@ use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
 class Response extends BaseResponse implements ResponseInterface
 {
-    protected array $customHeaders = [];
-
-    private string $author = 'wenber.yu@creative-life.club';
-
     public function success(
         $data = [],
         string $message = 'success',
@@ -38,17 +36,22 @@ class Response extends BaseResponse implements ResponseInterface
         return $this->formatting($code, $message, $data);
     }
 
-    public function fail(int $code, string $message = '', array $errors = [], array $data = []): PsrResponseInterface
-    {
+    public function fail(
+        int $status = BusCode::SUCCESS,
+        string $message = '',
+        int $code = HttpCode::HTTP_OK,
+        array $errors = [],
+        array $data = []
+    ): PsrResponseInterface {
         if (empty($message)) {
-            $message = HttpCode::getMessage($code) ?? 'error';
+            $message = BusCode::getMessage($code) ?? 'bus error';
         }
 
         if (config('app_env') !== 'dev') {
             $errors = [];
         }
 
-        return $this->formatting($code, $message, [], $errors);
+        return $this->formatting($code, $message, $data, $status, $errors);
     }
 
     public function custom(array $data = []): PsrResponseInterface
@@ -67,7 +70,7 @@ class Response extends BaseResponse implements ResponseInterface
         bool $raw = false,
         ?string $sameSite = null
     ): self {
-        $cookie   = new Cookie(
+        $cookie = new Cookie(
             $name,
             $value,
             $expire,
@@ -92,27 +95,33 @@ class Response extends BaseResponse implements ResponseInterface
             ->withBody(new SwooleStream($throwable->getMessage()));
     }
 
-    protected function formatting(int $code, string $message, $data = [], $errors = []): PsrResponseInterface
-    {
+    protected function formatting(
+        int $code,
+        string $message,
+        $data,
+        int $status = BusCode::SUCCESS,
+        array $errors = []
+    ): PsrResponseInterface {
         $body = [
             'request_id' => Context::get(AppendRequestProcessor::LOG_REQUEST_ID_KEY),
-            'code'       => $code,
-            'message'    => $message,
+            'status' => $status,
+            'message' => $message,
         ];
 
-        ! empty($data) && $body['data'] = $data;
+        !empty($data) && $body['data'] = $data;
 
-        ! empty($errors) && $body['errors'] = $errors;
+        !empty($errors) && $body['errors'] = $errors;
 
         $body = $this->toJson($body);
 
         return $this->withCustomHeaders(['content-type' => 'application/json; charset=utf-8'])
+            ->withStatus($code)
             ->withBody(new SwooleStream($body));
     }
 
     protected function withCustomHeaders(array $headers): PsrResponseInterface
     {
-        $config  = config('app_response_headers');
+        $config = config('app_response_headers');
         $headers = array_merge($config, $headers);
 
         $response = $this->getResponse();

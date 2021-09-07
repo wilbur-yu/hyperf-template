@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 /**
  * This file is part of project hyperf-template.
  *
@@ -12,8 +12,10 @@ declare(strict_types = 1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace App\Kernel\Contract;
 
+use App\Constants\BusCode;
 use App\Constants\HttpCode;
 use Hyperf\HttpServer\Contract\ResponseInterface as BaseResponseInterface;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
@@ -26,7 +28,13 @@ interface ResponseInterface extends BaseResponseInterface, PsrResponseInterface
         int $code = HttpCode::HTTP_OK
     ): PsrResponseInterface;
 
-    public function fail(int $code, string $message = '', array $errors = []): PsrResponseInterface;
+    public function fail(
+        int $status = BusCode::SUCCESS,
+        string $message = '',
+        int $code = HttpCode::HTTP_OK,
+        array $errors = []
+    ): PsrResponseInterface;
+
     public function cookie(
         string $name,
         string $value = '',

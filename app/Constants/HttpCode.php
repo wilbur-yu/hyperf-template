@@ -18,10 +18,9 @@ use Hyperf\Constants\AbstractConstants;
 use Hyperf\Constants\Annotation\Constants;
 
 /**
- * @Constants
- *
  * @method static getMessage(int $code)
  */
+#[Constants]
 class HttpCode extends AbstractConstants
 {
     /**
