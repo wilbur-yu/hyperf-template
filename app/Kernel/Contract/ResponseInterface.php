@@ -23,7 +23,7 @@ use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 interface ResponseInterface extends BaseResponseInterface, PsrResponseInterface
 {
     public function success(
-        array $data = [],
+        $data = [],
         string $message = 'success',
         int $code = HttpCode::HTTP_OK
     ): PsrResponseInterface;
@@ -32,7 +32,7 @@ interface ResponseInterface extends BaseResponseInterface, PsrResponseInterface
         int $status = BusCode::SUCCESS,
         string $message = '',
         array $errors = [],
-        array $data = [],
+        $data = [],
         int $code = HttpCode::HTTP_OK,
     ): PsrResponseInterface;
 }
