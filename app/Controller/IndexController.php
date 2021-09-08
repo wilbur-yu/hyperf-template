@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 /**
  * This file is part of project hyperf-template.
  *
@@ -12,18 +12,19 @@ declare(strict_types = 1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace App\Controller;
 
 class IndexController extends AbstractController
 {
-    public function index()
+    public function index(): array
     {
-        $user   = $this->request->input('user', 'Hyperf');
+        $user = $this->request->input('user', 'Hyperf');
         $method = $this->request->getMethod();
 
         return [
-            'method'  => $method,
-            'message' => "Hello {$user}.",
+            'method' => $method,
+            'message' => "Hello $user.",
         ];
     }
 }

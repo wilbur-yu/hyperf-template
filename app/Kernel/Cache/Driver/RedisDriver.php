@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 /**
  * This file is part of project hyperf-template.
  *
@@ -12,6 +12,7 @@ declare(strict_types = 1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace App\Kernel\Cache\Driver;
 
 use Hyperf\Cache\Driver\RedisDriver as BaseRedisDriver;

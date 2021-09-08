@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 /**
  * This file is part of project hyperf-template.
  *
@@ -12,6 +12,7 @@ declare(strict_types = 1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace App\Exception\Handler;
 
 use App\Constants\HttpCode;
@@ -67,11 +68,11 @@ class AppExceptionHandler extends ExceptionHandler
     protected function convertExceptionToArray(Throwable $throwable): array
     {
         return config('app_debug', false) ? [
-            'message'   => $throwable->getMessage(),
+            'message' => $throwable->getMessage(),
             'exception' => get_class($throwable),
-            'file'      => $throwable->getFile(),
-            'line'      => $throwable->getLine(),
-            'trace'     => collect($throwable->getTrace())->map(function ($trace) {
+            'file' => $throwable->getFile(),
+            'line' => $throwable->getLine(),
+            'trace' => collect($throwable->getTrace())->map(function ($trace) {
                 return Arr::except($trace, ['args']);
             })->all(),
         ] : [

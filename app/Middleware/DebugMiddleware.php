@@ -60,6 +60,7 @@ class DebugMiddleware implements MiddlewareInterface
             $context = [
                 'url'  => $request->url(),
                 'uri'  => $request->getUri()->getPath(),
+                'method' => $request->getMethod(),
                 'time' => $time,
             ];
 

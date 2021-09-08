@@ -39,9 +39,9 @@ class Response extends BaseResponse implements ResponseInterface
     public function fail(
         int $status = BusCode::SUCCESS,
         string $message = '',
-        int $code = HttpCode::HTTP_OK,
         array $errors = [],
-        array $data = []
+        array $data = [],
+        int $code = HttpCode::HTTP_OK,
     ): PsrResponseInterface {
         if (empty($message)) {
             $message = BusCode::getMessage($code) ?? 'bus error';
@@ -57,34 +57,6 @@ class Response extends BaseResponse implements ResponseInterface
     public function custom(array $data = []): PsrResponseInterface
     {
         return $this->json($data);
-    }
-
-    public function cookie(
-        string $name,
-        string $value = '',
-        $expire = 0,
-        string $path = '/',
-        string $domain = '',
-        bool $secure = false,
-        bool $httpOnly = true,
-        bool $raw = false,
-        ?string $sameSite = null
-    ): self {
-        $cookie = new Cookie(
-            $name,
-            $value,
-            $expire,
-            $path,
-            $domain,
-            $secure,
-            $httpOnly,
-            $raw,
-            $sameSite
-        );
-        $response = $this->getResponse()->withCookie($cookie);
-        Context::set(ResponseInterface::class, $response);
-
-        return $this;
     }
 
     public function handleException(HttpException $throwable): PsrResponseInterface

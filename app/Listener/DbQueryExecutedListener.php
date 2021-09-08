@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 /**
  * This file is part of project hyperf-template.
  *
@@ -11,6 +11,7 @@ declare(strict_types = 1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace App\Listener;
 
 use Hyperf\Database\Events\QueryExecuted;
@@ -43,7 +44,7 @@ class DbQueryExecutedListener implements ListenerInterface
     {
         if ($event instanceof QueryExecuted) {
             $sql = $event->sql;
-            if (! Arr::isAssoc($event->bindings)) {
+            if (!Arr::isAssoc($event->bindings)) {
                 foreach ($event->bindings as $key => $value) {
                     $sql = Str::replaceFirst('?', "'{$value}'", $sql);
                 }
