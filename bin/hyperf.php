@@ -1,5 +1,6 @@
 #!/usr/bin/env php
 <?php
+declare(strict_types=1);
 
 ini_set('display_errors', 'on');
 ini_set('display_startup_errors', 'on');
