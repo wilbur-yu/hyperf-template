@@ -40,7 +40,7 @@ class Response extends BaseResponse implements ResponseInterface
         int $status = BusCode::SUCCESS,
         string $message = '',
         array $errors = [],
-        array $data = [],
+        $data = [],
         int $code = HttpCode::HTTP_OK,
     ): PsrResponseInterface {
         if (empty($message)) {
@@ -56,7 +56,7 @@ class Response extends BaseResponse implements ResponseInterface
 
     public function custom(array $data = []): PsrResponseInterface
     {
-        return $this->json($data);
+        return $this->withCustomHeaders()->json($data);
     }
 
     public function handleException(HttpException $throwable): PsrResponseInterface
@@ -84,14 +84,10 @@ class Response extends BaseResponse implements ResponseInterface
 
         !empty($errors) && $body['errors'] = $errors;
 
-        $body = $this->toJson($body);
-
-        return $this->withCustomHeaders(['content-type' => 'application/json; charset=utf-8'])
-            ->withStatus($code)
-            ->withBody(new SwooleStream($body));
+        return $this->withCustomHeaders()->withStatus($code)->json($body);
     }
 
-    protected function withCustomHeaders(array $headers): PsrResponseInterface
+    protected function withCustomHeaders(array $headers = []): PsrResponseInterface
     {
         $config = config('app_response_headers');
         $headers = array_merge($config, $headers);
