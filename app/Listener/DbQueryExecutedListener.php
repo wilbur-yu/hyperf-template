@@ -26,13 +26,6 @@ use Psr\Log\LoggerInterface;
 #[Listener]
 class DbQueryExecutedListener implements ListenerInterface
 {
-    private LoggerInterface $logger;
-
-    public function __construct(ContainerInterface $container)
-    {
-        $this->logger = $container->get(LoggerFactory::class)->get('sql');
-    }
-
     public function listen(): array
     {
         return [
@@ -50,7 +43,7 @@ class DbQueryExecutedListener implements ListenerInterface
                 }
             }
 
-            $this->logger->info(sprintf('[%s] %s', $event->time, $sql));
+            logger('sql')->info(sprintf('[%s] %s', $event->time, $sql));
         }
     }
 }

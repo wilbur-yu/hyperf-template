@@ -19,7 +19,6 @@ use App\Constants\BusCode;
 use App\Constants\HttpCode;
 use App\Kernel\Contract\ResponseInterface;
 use App\Kernel\Log\AppendRequestProcessor;
-use Hyperf\HttpMessage\Cookie\Cookie;
 use Hyperf\HttpMessage\Exception\HttpException;
 use Hyperf\HttpMessage\Stream\SwooleStream;
 use Hyperf\HttpServer\Response as BaseResponse;
@@ -83,8 +82,9 @@ class Response extends BaseResponse implements ResponseInterface
         !empty($data) && $body['data'] = $data;
 
         !empty($errors) && $body['errors'] = $errors;
+        $body = $this->toJson($body);
 
-        return $this->withCustomHeaders()->withStatus($code)->json($body);
+        return $this->withCustomHeaders()->withStatus($code)->withBody(new SwooleStream($body));
     }
 
     protected function withCustomHeaders(array $headers = []): PsrResponseInterface
@@ -97,6 +97,7 @@ class Response extends BaseResponse implements ResponseInterface
             $response = $response?->withHeader($key, $value);
         }
         Context::set(ResponseInterface::class, $response);
+        Context::set(PsrResponseInterface::class, $response);
 
         return $response;
     }
