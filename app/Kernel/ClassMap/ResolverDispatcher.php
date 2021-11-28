@@ -1,17 +1,14 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
+
 /**
- * This file is part of project hyperf-template.
+ * This file is part of project burton.
  *
- * @author   wenber.yu@creative-life.club
+ * @author   wenbo@wenber.club
  * @link     https://github.com/wilbur-yu/hyperf-template
- *
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\Di\Resolver;
 
 use Hyperf\Di\Definition\DefinitionInterface;
@@ -24,44 +21,29 @@ use RuntimeException;
 
 class ResolverDispatcher implements ResolverInterface
 {
-    /**
-     * @var null|ObjectResolver
-     */
-    protected $objectResolver;
+    protected ?ObjectResolver $objectResolver = null;
 
-    /**
-     * @var null|FactoryResolver
-     */
-    protected $factoryResolver;
+    protected ?FactoryResolver $factoryResolver = null;
 
-    /**
-     * @var \Psr\Container\ContainerInterface
-     */
-    private $container;
-
-    public function __construct(ContainerInterface $container)
+    public function __construct(private ContainerInterface $container)
     {
-        $this->container = $container;
     }
 
     /**
      * Resolve a definition to a value.
      *
      * @param DefinitionInterface $definition object that defines how the value should be obtained
-     * @param array               $parameters optional parameters to use to build the entry
-     *
+     * @param array $parameters optional parameters to use to build the entry
      * @throws InvalidDefinitionException if the definition cannot be resolved
-     *
      * @return mixed value obtained from the definition
      */
-    public function resolve(DefinitionInterface $definition, array $parameters = [])
+    public function resolve(DefinitionInterface $definition, array $parameters = []): mixed
     {
         if ($definition instanceof SelfResolvingDefinitionInterface) {
             return $definition->resolve($this->container);
         }
 
         $resolver = $this->getDefinitionResolver($definition);
-
         return $resolver->resolve($definition, $parameters);
     }
 
@@ -69,7 +51,7 @@ class ResolverDispatcher implements ResolverInterface
      * Check if a definition can be resolved.
      *
      * @param DefinitionInterface $definition object that defines how the value should be obtained
-     * @param array               $parameters optional parameters to use to build the entry
+     * @param array $parameters optional parameters to use to build the entry
      */
     public function isResolvable(DefinitionInterface $definition, array $parameters = []): bool
     {
@@ -78,7 +60,6 @@ class ResolverDispatcher implements ResolverInterface
         }
 
         $resolver = $this->getDefinitionResolver($definition);
-
         return $resolver->isResolvable($definition, $parameters);
     }
 
@@ -94,13 +75,11 @@ class ResolverDispatcher implements ResolverInterface
                 if (! $this->objectResolver) {
                     $this->objectResolver = new ObjectResolver($this->container, $this);
                 }
-
                 return $this->objectResolver;
             case $definition instanceof FactoryDefinition:
                 if (! $this->factoryResolver) {
                     $this->factoryResolver = new FactoryResolver($this->container, $this);
                 }
-
                 return $this->factoryResolver;
             default:
                 throw new RuntimeException('No definition resolver was configured for definition of type ' . get_class($definition));

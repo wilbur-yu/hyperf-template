@@ -1,15 +1,12 @@
 <?php
 
 declare(strict_types=1);
+
 /**
- * This file is part of project hyperf-template.
+ * This file is part of project burton.
  *
- * @author   wenber.yu@creative-life.club
+ * @author   wenbo@wenber.club
  * @link     https://github.com/wilbur-yu/hyperf-template
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 
 namespace App\Listener;
@@ -17,11 +14,11 @@ namespace App\Listener;
 use Hyperf\Database\Events\QueryExecuted;
 use Hyperf\Event\Annotation\Listener;
 use Hyperf\Event\Contract\ListenerInterface;
-use Hyperf\Logger\LoggerFactory;
 use Hyperf\Utils\Arr;
+use Hyperf\Utils\Context;
+use Hyperf\Utils\Coroutine;
 use Hyperf\Utils\Str;
-use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 #[Listener]
 class DbQueryExecutedListener implements ListenerInterface
@@ -39,11 +36,14 @@ class DbQueryExecutedListener implements ListenerInterface
             $sql = $event->sql;
             if (!Arr::isAssoc($event->bindings)) {
                 foreach ($event->bindings as $key => $value) {
-                    $sql = Str::replaceFirst('?', "'{$value}'", $sql);
+                    $sql = Str::replaceFirst('?', "'$value'", $sql);
                 }
             }
-
-            logger('sql')->info(sprintf('[%s] %s', $event->time, $sql));
+            $serverRequest = Context::get(ServerRequestInterface::class);
+            logger('db.query')->info(
+                sprintf('[%s] %s', $event->time, $sql),
+                ['uri' => $serverRequest?->getUri()->getPath()]
+            );
         }
     }
 }

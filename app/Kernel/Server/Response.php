@@ -1,76 +1,132 @@
 <?php
 
 declare(strict_types=1);
+
 /**
- * This file is part of project hyperf-template.
+ * This file is part of project burton.
  *
- * @author   wenber.yu@creative-life.club
+ * @author   wenbo@wenber.club
  * @link     https://github.com/wilbur-yu/hyperf-template
- *
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 
 namespace App\Kernel\Server;
 
 use App\Constants\BusCode;
 use App\Constants\HttpCode;
-use App\Kernel\Contract\ResponseInterface;
+use App\Kernel\Contract\ResponseInterface as CustomResponseInterface;
 use App\Kernel\Log\AppendRequestProcessor;
-use Hyperf\HttpMessage\Exception\HttpException;
-use Hyperf\HttpMessage\Stream\SwooleStream;
+use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\HttpServer\Response as BaseResponse;
+use Hyperf\Paginator\AbstractPaginator;
+use Hyperf\Resource\Json\JsonResource;
+use Hyperf\Resource\Json\ResourceCollection;
 use Hyperf\Utils\Context;
+use Hyperf\Utils\Contracts\Arrayable;
+use JetBrains\PhpStorm\ArrayShape;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
-class Response extends BaseResponse implements ResponseInterface
+class Response extends BaseResponse implements CustomResponseInterface
 {
-    public function success(
-        $data = [],
-        string $message = 'success',
-        int $code = HttpCode::HTTP_OK
-    ): PsrResponseInterface {
-        return $this->formatting($code, $message, $data);
+    public function success($data = [], string $message = 'success', int $code = HttpCode::OK): PsrResponseInterface
+    {
+        if ($data instanceof ResourceCollection) {
+            $data = $this->formatResourceCollection(...func_get_args());
+        }
+
+        if ($data instanceof AbstractPaginator) {
+            $data = $this->formatPaginated($data);
+        }
+
+        if ($data instanceof JsonResource) {
+            $data = $this->formatResource(...func_get_args());
+        }
+
+        if ($data instanceof Arrayable) {
+            $data = $data->toArray();
+        }
+
+        return $this->formatting($code, $message, $code, $data);
     }
+
+    protected function formatPaginated(AbstractPaginator $resource): array
+    {
+        $paginated = $resource->toArray();
+        $data['data'] = $paginated['data'];
+        $paginationInformation = $this->formatPaginatedData($paginated);
+
+        return array_merge_recursive($data, $paginationInformation);
+    }
+
+    protected function formatResource(JsonResource $resource): array
+    {
+        return array_merge_recursive(
+            $resource->resolve(),
+            $resource->with(),
+            $resource->additional
+        );
+    }
+
+    protected function formatResourceCollection(ResourceCollection $resource): array
+    {
+        $data = array_merge_recursive(
+            $resource->resolve(),
+            $resource->with(),
+            $resource->additional
+        );
+        if ($resource->resource instanceof AbstractPaginator) {
+            $paginated = $resource->resource->toArray();
+            $paginationInformation = $this->formatPaginatedData($paginated);
+
+            $data = array_merge_recursive($data, $paginationInformation);
+        }
+
+        return $data;
+    }
+
+
+    #[ArrayShape(['meta' => 'array', 'links' => 'array'])]
+    protected function formatPaginatedData(array $paginated): array
+    {
+        return [
+            'meta' => [
+                'to' => $paginated['to'] ?? 0,
+                'per_page' => $paginated['per_page'] ?? 0,
+                'current_page' => $paginated['current_page'] ?? 0,
+                'path' => $paginated['path'] ?? '',
+                'from' => $paginated['from'] ?? 0,
+            ],
+            'links' => [
+                'first' => $paginated['first_page_url'] ?? '',
+                'last' => $paginated['last_page_url'] ?? '',
+                'next' => $paginated['next_page_url'] ?? '',
+                'prev' => $paginated['prev_page_url'] ?? '',
+            ],
+        ];
+    }
+
 
     public function fail(
         int $status = BusCode::SUCCESS,
         string $message = '',
         array $errors = [],
-        $data = [],
-        int $code = HttpCode::HTTP_OK,
+        int $code = HttpCode::OK,
     ): PsrResponseInterface {
         if (empty($message)) {
-            $message = BusCode::getMessage($code) ?? 'bus error';
+            $message = BusCode::getMessage($status) ?? 'bus error';
         }
 
-        if (config('app_env') !== 'dev') {
+        if (!config('app_debug')) {
             $errors = [];
         }
 
-        return $this->formatting($code, $message, $data, $status, $errors);
-    }
-
-    public function custom(array $data = []): PsrResponseInterface
-    {
-        return $this->withCustomHeaders()->json($data);
-    }
-
-    public function handleException(HttpException $throwable): PsrResponseInterface
-    {
-        return $this->getResponse()
-            ?->withAddedHeader('Server', config('app_name'))
-            ->withStatus($throwable->getStatusCode())
-            ->withBody(new SwooleStream($throwable->getMessage()));
+        return $this->formatting($code, $message, $status, errors: $errors);
     }
 
     protected function formatting(
         int $code,
         string $message,
-        $data,
         int $status = BusCode::SUCCESS,
+        $data = [],
         array $errors = []
     ): PsrResponseInterface {
         $body = [
@@ -79,26 +135,36 @@ class Response extends BaseResponse implements ResponseInterface
             'message' => $message,
         ];
 
-        !empty($data) && $body['data'] = $data;
+        !empty($errors) && $body['debug'] = $errors;
+        if (!empty($data)) {
+            $body = isset($data['data']) ? array_merge($body, $data) : array_merge($body, ['data' => $data]);
+        }
 
-        !empty($errors) && $body['errors'] = $errors;
-        $body = $this->toJson($body);
-
-        return $this->withCustomHeaders()->withStatus($code)->withBody(new SwooleStream($body));
+        return $this->withCustomHeaders(['content-type' => 'application/json; charset=utf-8'])
+            ->withStatus($code)
+            ->json($body);
     }
 
-    protected function withCustomHeaders(array $headers = []): PsrResponseInterface
+    protected function withCustomHeaders(array $headers): ResponseInterface
     {
         $config = config('app_response_headers');
         $headers = array_merge($config, $headers);
 
-        $response = $this->getResponse();
-        foreach ($headers as $key => $value) {
-            $response = $response?->withHeader($key, $value);
+        if (!Context::has(ResponseInterface::class)) {
+            $response = app()->get(ResponseInterface::class);
+            Context::set(ResponseInterface::class, $response);
         }
-        Context::set(ResponseInterface::class, $response);
-        Context::set(PsrResponseInterface::class, $response);
 
-        return $response;
+        return Context::override(
+            ResponseInterface::class,
+            function (ResponseInterface $response) use ($headers) {
+                $newResponse = $response;
+                foreach ($headers as $key => $value) {
+                    $newResponse = $newResponse->withHeader($key, $value);
+                }
+
+                return $newResponse;
+            }
+        );
     }
 }

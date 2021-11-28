@@ -1,32 +1,37 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
+
 /**
- * This file is part of project hyperf-template.
+ * This file is part of project burton.
  *
- * @author   wenber.yu@creative-life.club
+ * @author   wenbo@wenber.club
  * @link     https://github.com/wilbur-yu/hyperf-template
- *
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
+$env = env('APP_ENV');
+$level = match ($env) {
+    'prod' => Monolog\Logger::ERROR,
+    'test' => Monolog\Logger::INFO,
+    default => Monolog\Logger::DEBUG,
+};
+
 return [
     'default' => [
-        'handler'    => [
-            'class'       => Monolog\Handler\RotatingFileHandler::class,
+        'handler' => [
+            'class' => Monolog\Handler\RotatingFileHandler::class,
             'constructor' => [
-                'filename' => BASE_PATH . '/runtime/logs/hyperf.log',
-                'level'    => Monolog\Logger::ERROR,
+                'filename' => BASE_PATH.'/runtime/logs/hyperf.log',
+                'level' => $level,
             ],
         ],
-        'formatter'  => [
-            'class'       => Monolog\Formatter\LineFormatter::class,
+        'formatter' => [
+            'class' => Monolog\Formatter\LineFormatter::class,
             'constructor' => [
-                'format'                => null,
-                'dateFormat'            => 'Y-m-d H:i:s',
+                'format' => null,
+                'dateFormat' => 'Y-m-d H:i:s',
                 'allowInlineLineBreaks' => true,
+                'includeStacktraces' => true,
             ],
         ],
         'processors' => [

@@ -1,17 +1,14 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
+
 /**
- * This file is part of project hyperf-template.
+ * This file is part of project burton.
  *
- * @author   wenber.yu@creative-life.club
+ * @author   wenbo@wenber.club
  * @link     https://github.com/wilbur-yu/hyperf-template
- *
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\Utils;
 
 use App\Kernel\Context\Coroutine as Go;
@@ -19,6 +16,7 @@ use Hyperf\Engine\Coroutine as Co;
 use Hyperf\Engine\Exception\CoroutineDestroyedException;
 use Hyperf\Engine\Exception\RunningInNonCoroutineException;
 use function di;
+
 class Coroutine
 {
     /**
@@ -37,15 +35,14 @@ class Coroutine
 
     public static function sleep(float $seconds): void
     {
-        usleep((int) ($seconds * 1000 * 1000));
+        usleep((int)($seconds * 1000 * 1000));
     }
 
     /**
      * Returns the parent coroutine ID.
      * Returns 0 when running in the top level coroutine.
-     *
      * @throws RunningInNonCoroutineException when running in non-coroutine context
-     * @throws CoroutineDestroyedException    when the coroutine has been destroyed
+     * @throws CoroutineDestroyedException when the coroutine has been destroyed
      */
     public static function parentId(?int $coroutineId = null): int
     {

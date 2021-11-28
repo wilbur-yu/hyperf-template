@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 /**
  * This file is part of project hyperf-template.
  *
@@ -13,16 +13,17 @@ declare(strict_types = 1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 $dependencies = [
-    Hyperf\HttpServer\Contract\ResponseInterface::class    => App\Kernel\Server\Response::class,
-    Psr\Http\Message\ResponseInterface::class              => App\Kernel\Server\Response::class,
-    App\Kernel\Contract\ResponseInterface::class           => App\Kernel\Server\Response::class,
-    App\Kernel\Contract\CacheInterface::class              => App\Kernel\Cache\Cache::class,
-    Psr\SimpleCache\CacheInterface::class                  => App\Kernel\Cache\Cache::class,
-    Hyperf\Contract\PackerInterface::class                 => App\Kernel\Utils\Packer\PhpSerializerPacker::class,
+    Hyperf\Dispatcher\HttpDispatcher::class => App\Kernel\Server\HttpDispatcher::class,
+    Hyperf\HttpServer\Contract\ResponseInterface::class => App\Kernel\Server\Response::class,
+    Psr\Http\Message\ResponseInterface::class => App\Kernel\Server\Response::class,
+    App\Kernel\Contract\ResponseInterface::class => App\Kernel\Server\Response::class,
+    App\Kernel\Contract\CacheInterface::class => App\Kernel\Cache\Cache::class,
+    Psr\SimpleCache\CacheInterface::class => App\Kernel\Cache\Cache::class,
+    Hyperf\Contract\PackerInterface::class => App\Kernel\Utils\Packer\PhpSerializerPacker::class,
     Hyperf\Server\Listener\AfterWorkerStartListener::class => App\Kernel\Listener\WorkerStartListener::class,
     // Hyperf\Crontab\Strategy\StrategyInterface::class       => Hyperf\Crontab\Strategy\CoroutineStrategy::class,
 ];
-$appEnv       = env('APP_ENV', 'dev');
+$appEnv = env('APP_ENV', 'dev');
 if ($appEnv === 'prod') {
     $dependencies[Hyperf\Contract\StdoutLoggerInterface::class] = App\Kernel\Log\StdoutLoggerFactory::class;
 } else {

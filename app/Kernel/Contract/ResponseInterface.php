@@ -1,16 +1,12 @@
 <?php
 
 declare(strict_types=1);
+
 /**
- * This file is part of project hyperf-template.
+ * This file is part of project burton.
  *
- * @author   wenber.yu@creative-life.club
+ * @author   wenbo@wenber.club
  * @link     https://github.com/wilbur-yu/hyperf-template
- *
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 
 namespace App\Kernel\Contract;
@@ -25,14 +21,13 @@ interface ResponseInterface extends BaseResponseInterface, PsrResponseInterface
     public function success(
         $data = [],
         string $message = 'success',
-        int $code = HttpCode::HTTP_OK
+        int $code = HttpCode::OK
     ): PsrResponseInterface;
 
     public function fail(
         int $status = BusCode::SUCCESS,
         string $message = '',
         array $errors = [],
-        $data = [],
-        int $code = HttpCode::HTTP_OK,
+        int $code = HttpCode::OK,
     ): PsrResponseInterface;
 }

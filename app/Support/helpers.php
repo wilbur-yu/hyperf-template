@@ -1,85 +1,103 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
+
 /**
- * This file is part of project hyperf-template.
+ * This file is part of project burton.
  *
- * @author   wenber.yu@creative-life.club
+ * @author   wenbo@wenber.club
  * @link     https://github.com/wilbur-yu/hyperf-template
- *
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 use App\Kernel\Contract\CacheInterface;
 use App\Kernel\Contract\ResponseInterface;
 use App\Kernel\Log\Log;
+use App\Kernel\Server\RouteCollector;
+use Carbon\Carbon;
+use Hyperf\Contract\SessionInterface;
 use Hyperf\Contract\StdoutLoggerInterface;
+use Hyperf\Contract\TranslatorInterface;
+use Hyperf\Contract\ValidatorInterface;
 use Hyperf\ExceptionHandler\Formatter\FormatterInterface;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\Server\ServerFactory;
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Str;
+use Hyperf\Validation\Contract\ValidatorFactoryInterface;
+use JetBrains\PhpStorm\Pure;
 use Psr\Container\ContainerInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Swoole\Server;
 use Swoole\WebSocket\Frame;
 
-if (! function_exists('format_duration')) {
+if (!function_exists('locale')) {
+    function locale(): string
+    {
+        return app()->get(TranslatorInterface::class)->getLocale();
+    }
+}
+
+if (!function_exists('route')) {
+    function route(string $name, array $variables = [], string $server = 'http'): string
+    {
+        $container = container();
+        $collector = $container->get(RouteCollector::class);
+
+        return $collector->getPath($name, $variables, $server);
+    }
+}
+
+if (!function_exists('format_duration')) {
     /**
      * Format duration.
-     *
-     * @param float $seconds
-     *
-     * @return string
      */
     function format_duration(float $seconds): string
     {
         if ($seconds < 0.001) {
-            return round($seconds * 1000000) . 'μs';
+            return round($seconds * 1000000).'μs';
         }
 
         if ($seconds < 1) {
-            return round($seconds * 1000, 2) . 'ms';
+            return round($seconds * 1000, 2).'ms';
         }
 
-        return round($seconds, 2) . 's';
+        return round($seconds, 2).'s';
     }
 }
 
-if (! function_exists('hide_str')) {
+if (!function_exists('hide_str')) {
     /**
      * 将一个字符串部分字符用$re替代隐藏.
      *
-     * @param null|string $string 待处理的字符串
-     * @param int         $start  规定在字符串的何处开始，
+     * @param  null|string  $string  待处理的字符串
+     * @param  int          $start  规定在字符串的何处开始，
      *                            正数 - 在字符串的指定位置开始
      *                            负数 - 在从字符串结尾的指定位置开始
      *                            0 - 在字符串中的第一个字符处开始
-     * @param int         $length 可选。规定要隐藏的字符串长度。默认是直到字符串的结尾。
+     * @param  int          $length  可选。规定要隐藏的字符串长度。默认是直到字符串的结尾。
      *                            正数 - 从 start 参数所在的位置隐藏
      *                            负数 - 从字符串末端隐藏
-     * @param string      $re     替代符
+     * @param  string       $re  替代符
      *
      * @return bool|string 处理后的字符串
      */
-    function hide_str(?string $string, int $start = 0, int $length = 0, string $re = '*'): bool | string
+    function hide_str(?string $string, int $start = 0, int $length = 0, string $re = '*'): bool|string
     {
         if (empty($string)) {
             return '';
         }
-        $strArr   = [];
+        $strArr = [];
         $mbStrLen = mb_strlen($string);
         //循环把字符串变为数组
         while ($mbStrLen) {
             $strArr[] = mb_substr($string, 0, 1, 'utf8');
-            $string   = mb_substr($string, 1, $mbStrLen, 'utf8');
+            $string = mb_substr($string, 1, $mbStrLen, 'utf8');
             $mbStrLen = mb_strlen($string);
         }
         $strLen = count($strArr);
-        $begin  = $start >= 0 ? $start : ($strLen - abs($start));
-        $end    = $last = $strLen - 1;
+        $begin = $start >= 0 ? $start : ($strLen - abs($start));
+        $end = $last = $strLen - 1;
         if ($length > 0) {
             $end = $begin + $length - 1;
         } elseif ($length < 0) {
@@ -96,43 +114,62 @@ if (! function_exists('hide_str')) {
     }
 }
 
-if (! function_exists('app')) {
+if (!function_exists('app')) {
+    #[Pure]
     function app(): ContainerInterface
     {
         return container();
     }
 }
 
-if (! function_exists('di')) {
+if (!function_exists('di')) {
+    #[Pure]
     function di(): ContainerInterface
     {
         return container();
     }
 }
 
-if (! function_exists('get_available_no')) {
+if (!function_exists('orderNo')) {
     /**
      * 支持中小型支付系统，单机房生成订单号QPS<=1w，保证订单号绝对唯一
      */
-    function get_available_no(string $prefix = ''): string
+    function orderNo(string $prefix = ''): string
     {
-        return $prefix . date('YmdHis') .
-               substr(implode(null, array_map('ord', str_split(substr(uniqid('', true), 7, 13)))), 0, 8);
+        return $prefix.date('YmdHis').
+               substr(
+                   implode(
+                       '',
+                       array_map(
+                           'ord',
+                           str_split(
+                               substr(
+                                   uniqid('', true),
+                                   7,
+                                   13
+                               )
+                           )
+                       )
+                   ),
+                   0,
+                   8
+               );
     }
 }
 
-if (! function_exists('container')) {
+if (!function_exists('container')) {
+    #[Pure]
     function container(): ContainerInterface
     {
         return ApplicationContext::getContainer();
     }
 }
 
-if (! function_exists('format_throwable')) {
+if (!function_exists('format_throwable')) {
     /**
      * Format a throwable to string.
      *
-     * @param \Throwable $throwable
+     * @param  \Throwable  $throwable
      *
      * @return string
      */
@@ -142,20 +179,19 @@ if (! function_exists('format_throwable')) {
     }
 }
 
-if (! function_exists('throw_if')) {
+if (!function_exists('throw_if')) {
     /**
      * @license https://github.com/laravel/framework
      * Throw the given exception if the given condition is true.
      *
-     * @param bool              $condition
-     * @param string|\Throwable $exception
-     * @param array             ...$parameters
+     * @param  bool               $condition
+     * @param  string|\Throwable  $exception
+     * @param  array              ...$parameters
      *
+     * @return bool|null
      * @throws \Throwable
-     *
-     * @return null|bool
      */
-    function throw_if(bool $condition, Throwable | string $exception, ...$parameters): ?bool
+    function throw_if(bool $condition, Throwable|string $exception, ...$parameters): ?bool
     {
         if ($condition) {
             throw (is_string($exception) ? new $exception(...$parameters) : $exception);
@@ -165,22 +201,21 @@ if (! function_exists('throw_if')) {
     }
 }
 
-if (! function_exists('throw_unless')) {
+if (!function_exists('throw_unless')) {
     /**
      * @license https://github.com/laravel/framework
      * Throw the given exception unless the given condition is true.
      *
-     * @param bool              $condition
-     * @param string|\Throwable $exception
-     * @param array             ...$parameters
-     *
-     * @throws \Throwable
+     * @param  bool               $condition
+     * @param  string|\Throwable  $exception
+     * @param  array              ...$parameters
      *
      * @return bool
+     * @throws \Throwable
      */
-    function throw_unless(bool $condition, Throwable | string $exception, ...$parameters): bool
+    function throw_unless(bool $condition, Throwable|string $exception, ...$parameters): bool
     {
-        if (! $condition) {
+        if (!$condition) {
             throw (is_string($exception) ? new $exception(...$parameters) : $exception);
         }
 
@@ -188,20 +223,18 @@ if (! function_exists('throw_unless')) {
     }
 }
 
-/*
- * server 实例 基于 swoole server
- */
-if (! function_exists('server')) {
+// server 实例 基于 swoole server
+if (!function_exists('server')) {
     /**
      * @return \Swoole\Coroutine\Server|\Swoole\Server
      */
-    function server(): Server | \Swoole\Coroutine\Server
+    function server(): Server|Swoole\Coroutine\Server
     {
         return container()->get(ServerFactory::class)->getServer()->getServer();
     }
 }
 
-if (! function_exists('get_client_ip')) {
+if (!function_exists('get_client_ip')) {
     function get_client_ip(): string
     {
         /**
@@ -229,17 +262,17 @@ if (! function_exists('get_client_ip')) {
     }
 }
 
-if (! function_exists('verify_ip')) {
+if (!function_exists('verify_ip')) {
     function verify_ip($realIp)
     {
         return filter_var($realIp, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
     }
 }
 
-if (! function_exists('filter_emoji')) {
+if (!function_exists('filter_emoji')) {
     function filter_emoji($str): string
     {
-        $str     = preg_replace_callback(
+        $str = preg_replace_callback(
             '/./u',
             static function (array $match) {
                 return strlen($match[0]) >= 4 ? '' : $match[0];
@@ -252,7 +285,7 @@ if (! function_exists('filter_emoji')) {
     }
 }
 
-if (! function_exists('frame')) {
+if (!function_exists('frame')) {
     /**
      * websocket frame 实例.
      */
@@ -262,7 +295,7 @@ if (! function_exists('frame')) {
     }
 }
 
-if (! function_exists('cache')) {
+if (!function_exists('cache')) {
     /**
      * 缓存实例 简单的缓存.
      */
@@ -272,7 +305,7 @@ if (! function_exists('cache')) {
     }
 }
 
-if (! function_exists('stdLog')) {
+if (!function_exists('stdLog')) {
     /**
      * 控制台日志.
      */
@@ -282,7 +315,7 @@ if (! function_exists('stdLog')) {
     }
 }
 
-if (! function_exists('logger')) {
+if (!function_exists('logger')) {
     /**
      * 文件日志.
      */
@@ -292,28 +325,24 @@ if (! function_exists('logger')) {
     }
 }
 
-if (! function_exists('request')) {
+if (!function_exists('request')) {
     function request(): RequestInterface
     {
         return container()->get(RequestInterface::class);
     }
 }
 
-if (! function_exists('response')) {
+if (!function_exists('response')) {
     function response(): ResponseInterface
     {
         return container()->get(ResponseInterface::class);
     }
 }
 
-if (! function_exists('blank')) {
+if (!function_exists('blank')) {
     /**
      * @license https://github.com/laravel/framework
      * Determine if the given value is "blank".
-     *
-     * @param mixed $value
-     *
-     * @return bool
      */
     function blank(mixed $value): bool
     {
@@ -322,7 +351,7 @@ if (! function_exists('blank')) {
         }
 
         if (is_string($value)) {
-            return trim($value) === '';
+            return '' === trim($value);
         }
 
         if (is_numeric($value) || is_bool($value)) {
@@ -330,40 +359,30 @@ if (! function_exists('blank')) {
         }
 
         if ($value instanceof Countable) {
-            return count($value) === 0;
+            return 0 === count($value);
         }
 
         return empty($value);
     }
 }
 
-if (! function_exists('filled')) {
+if (!function_exists('filled')) {
     /**
      * @license https://github.com/laravel/framework
      * Determine if a value is "filled".
-     *
-     * @param mixed $value
-     *
-     * @return bool
      */
+    #[Pure]
     function filled(mixed $value): bool
     {
-        return ! blank($value);
+        return !blank($value);
     }
 }
 
-if (! function_exists('retry')) {
+if (!function_exists('retry')) {
     /**
      * Retry an operation a given number of times.
      *
-     * @param int           $times
-     * @param callable      $callback
-     * @param int           $sleep
-     * @param null|callable $when
-     *
      * @throws \Exception
-     *
-     * @return mixed
      */
     function retry(int $times, callable $callback, int $sleep = 0, callable $when = null): mixed
     {
@@ -376,7 +395,7 @@ if (! function_exists('retry')) {
         try {
             return $callback($attempts);
         } catch (Exception $e) {
-            if ($times < 1 || ($when && ! $when($e))) {
+            if ($times < 1 || ($when && !$when($e))) {
                 throw $e;
             }
 
@@ -389,15 +408,10 @@ if (! function_exists('retry')) {
     }
 }
 
-if (! function_exists('with')) {
+if (!function_exists('with')) {
     /**
      * @license https://github.com/laravel/framework
      * Return the given value, optionally passed through the given callback.
-     *
-     * @param mixed         $value
-     * @param null|callable $callback
-     *
-     * @return mixed
      */
     function with(mixed $value, callable $callback = null): mixed
     {
@@ -405,7 +419,7 @@ if (! function_exists('with')) {
     }
 }
 
-if (! function_exists('guid')) {
+if (!function_exists('guid')) {
     /**
      * GUID在空间上和时间上具有唯一性，保证同一时间不同地方产生的数字不同。
      * 世界上的任何两台计算机都不会生成重复的 GUID 值
@@ -416,10 +430,139 @@ if (! function_exists('guid')) {
 
         $hyphen = chr(45); // "-"
 
-        return substr($charId, 0, 8) . $hyphen
-               . substr($charId, 8, 4) . $hyphen
-               . substr($charId, 12, 4) . $hyphen
-               . substr($charId, 16, 4) . $hyphen
-               . substr($charId, 20, 12);
+        return substr($charId, 0, 8).$hyphen
+               .substr($charId, 8, 4).$hyphen
+               .substr($charId, 12, 4).$hyphen
+               .substr($charId, 16, 4).$hyphen
+               .substr($charId, 20, 12);
     }
 }
+if (!function_exists('info')) {
+    /**
+     * @license https://github.com/friendsofhyperf/helpers
+     *
+     * @param  string  $message
+     * @param  array   $context
+     * @param  bool    $backtrace
+     */
+    function info(string $message, array $context = [], bool $backtrace = false)
+    {
+        if ($backtrace) {
+            $traces = debug_backtrace();
+            $context['backtrace'] = sprintf('%s:%s', $traces[0]['file'], $traces[0]['line']);
+        }
+
+        logger()->info($message, $context);
+    }
+}
+if (!function_exists('now')) {
+    /**
+     * @license https://github.com/friendsofhyperf/helpers
+     * Create a new Carbon instance for the current time.
+     *
+     * @param  \DateTimeZone|string|null  $tz
+     *
+     * @return \Carbon\Carbon
+     */
+    function now(DateTimeZone|string $tz = null): Carbon
+    {
+        return Carbon::now($tz);
+    }
+}
+if (!function_exists('object_get')) {
+    /**
+     * @license https://github.com/friendsofhyperf/helpers
+     * Get an item from an object using "dot" notation.
+     *
+     * @param  object       $object
+     * @param  string|null  $key
+     * @param  mixed|null   $default
+     *
+     * @return mixed
+     */
+    function object_get(object $object, ?string $key, mixed $default = null): mixed
+    {
+        if (is_null($key) || trim($key) === '') {
+            return $object;
+        }
+
+        foreach (explode('.', $key) as $segment) {
+            if (!is_object($object) || !isset($object->{$segment})) {
+                return value($default);
+            }
+
+            $object = $object->{$segment};
+        }
+
+        return $object;
+    }
+}
+if (!function_exists('session')) {
+    /**
+     * @license https://github.com/friendsofhyperf/helpers
+     * Get / set the specified session value.
+     *
+     * If an array is passed as the key, we will assume you want to set an array of values.
+     *
+     * @return \Hyperf\Contract\SessionInterface
+     */
+    function session(): SessionInterface
+    {
+        return app()->get(SessionInterface::class);
+    }
+}
+if (!function_exists('today')) {
+    /**
+     * @license https://github.com/friendsofhyperf/helpers
+     * Create a new Carbon instance for the current date.
+     *
+     * @param  \DateTimeZone|string|null  $tz
+     *
+     * @return \Carbon\Carbon
+     */
+    function today(DateTimeZone|string $tz = null): Carbon
+    {
+        return Carbon::today($tz);
+    }
+}
+if (!function_exists('event')) {
+    /**
+     * @license https://github.com/friendsofhyperf/helpers
+     * Dispatch an event and call the listeners.
+     *
+     * @return \Psr\EventDispatcher\EventDispatcherInterface
+     */
+    function event(): EventDispatcherInterface
+    {
+        return app()->get(EventDispatcherInterface::class);
+    }
+}
+if (!function_exists('validator')) {
+    /**
+     * @license https://github.com/friendsofhyperf/helpers
+     * Create a new Validator instance.
+     *
+     * @param  array  $data
+     * @param  array  $rules
+     * @param  array  $messages
+     * @param  array  $customAttributes
+     *
+     * @return \Hyperf\Validation\Contract\ValidatorFactoryInterface|\Hyperf\Contract\ValidatorInterface
+     */
+    function validator(
+        array $data = [],
+        array $rules = [],
+        array $messages = [],
+        array $customAttributes = []
+    ): ValidatorFactoryInterface|ValidatorInterface {
+        /** @var \Hyperf\Validation\Contract\ValidatorFactoryInterface $factory */
+        $factory = app()->get(ValidatorFactoryInterface::class);
+
+        if (func_num_args() === 0) {
+            return $factory;
+        }
+
+        return $factory->make($data, $rules, $messages, $customAttributes);
+    }
+}
+

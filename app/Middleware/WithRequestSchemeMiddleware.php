@@ -1,11 +1,18 @@
 <?php
 
+/**
+ * This file is part of project burton.
+ *
+ * @author   wenbo@wenber.club
+ * @link     https://github.com/wilbur-yu/hyperf-template
+ */
+
 namespace App\Middleware;
 
 use Hyperf\Utils\Context;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 class WithRequestSchemeMiddleware implements MiddlewareInterface
@@ -28,7 +35,7 @@ class WithRequestSchemeMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if ($request->getHeaderLine('https') !== 'on') {
+        if ('on' !== $request->getHeaderLine('https')) {
             return $handler->handle($request);
         }
         $newUri = $request->getUri()->withScheme('https');

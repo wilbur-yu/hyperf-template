@@ -29,4 +29,17 @@ class BusCode extends AbstractConstants
     public const APP_GET_NOT_FOUND_ERROR = 5001;
 
     public const SUCCESS = 200;
+
+    /**
+     * @Message("信息非法")
+     */
+    public const CRYPT_DECRYPT_FAILED = 5100;
+    /**
+     * @Message("信息附加标识解析失败")
+     */
+    public const CRYPT_DECRYPT_EXPLODE_FAILED = 5101;
+    /**
+     * @Message("信息以过期, 请刷新")
+     */
+    public const CRYPT_DECRYPT_EXPIRE_FAILED = 5102;
 }

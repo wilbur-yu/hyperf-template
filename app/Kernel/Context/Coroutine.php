@@ -1,16 +1,14 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
+
 /**
- * This file is part of project hyperf-template.
+ * This file is part of project burton.
  *
- * @author   wenber.yu@creative-life.club
+ * @author   wenbo@wenber.club
  * @link     https://github.com/wilbur-yu/hyperf-template
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace App\Kernel\Context;
 
 use App\Kernel\Log\AppendRequestProcessor;
@@ -20,14 +18,14 @@ use Hyperf\Utils;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
-
+use Psr\Log\LoggerInterface;
 class Coroutine
 {
-    protected StdoutLoggerInterface $logger;
+    protected LoggerInterface $logger;
 
     public function __construct(ContainerInterface $container)
     {
-        $this->logger    = $container->get(StdoutLoggerInterface::class);
+        $this->logger = $container->get(StdoutLoggerInterface::class);
     }
 
     /**
@@ -36,7 +34,7 @@ class Coroutine
      */
     public function create(callable $callable): int
     {
-        $id        = Utils\Coroutine::id();
+        $id = Utils\Coroutine::id();
         $coroutine = Co::create(function () use ($callable, $id) {
             try {
                 // Shouldn't copy all contexts to avoid socket already been bound to another coroutine.
@@ -54,7 +52,6 @@ class Coroutine
             return $coroutine->getId();
         } catch (Throwable $throwable) {
             $this->logger->warning((string) $throwable);
-
             return -1;
         }
     }
