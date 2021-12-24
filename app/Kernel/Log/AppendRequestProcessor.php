@@ -1,17 +1,14 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
+
 /**
- * This file is part of project hyperf-template.
+ * This file is part of project burton.
  *
- * @author   wenber.yu@creative-life.club
+ * @author   wenbo@wenber.club
  * @link     https://github.com/wilbur-yu/hyperf-template
- *
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace App\Kernel\Log;
 
 use Hyperf\Utils\Context;
@@ -25,9 +22,11 @@ class AppendRequestProcessor implements ProcessorInterface
 
     public const LOG_COROUTINE_ID_KEY = 'log.coroutine_id';
 
+    public const LOG_LIFECYCLE_KEY = 'lifecycle';
+
     public function __invoke(array $record): array
     {
-        $record['context']['request_id']   = Context::get(self::LOG_REQUEST_ID_KEY);
+        $record['context']['request_id'] = Context::get(self::LOG_REQUEST_ID_KEY);
         $record['context']['coroutine_id'] = Context::get(self::LOG_COROUTINE_ID_KEY);
 
         return $record;

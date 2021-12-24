@@ -1,27 +1,24 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
+
 /**
- * This file is part of project hyperf-template.
+ * This file is part of project burton.
  *
- * @author   wenber.yu@creative-life.club
+ * @author   wenbo@wenber.club
  * @link     https://github.com/wilbur-yu/hyperf-template
- *
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace App\Kernel\Utils\Packer;
 
 use Hyperf\Contract\PackerInterface;
 
-class PhpSerializerPacker implements PackerInterface
+class PhpSerializerPacker
 {
-    public function pack($data): string
+    public function pack($data): string|int
     {
-        return is_numeric($data) && ! in_array($data, [INF, -INF], true)
-                                 && ! is_nan((float) $data) ? $data : serialize($data);
+        return is_numeric($data) && !in_array($data, [INF, -INF], true)
+               && !is_nan((float)$data) ? $data : serialize($data);
     }
 
     public function unpack(string $data)

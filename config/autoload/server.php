@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 /**
  * This file is part of project hyperf-template.
  *
@@ -20,6 +20,7 @@ use Swoole\Constant;
 $appEnv = env('APP_ENV', 'dev');
 
 return [
+    // 'type' => Hyperf\Server\CoroutineServer::class,
     'mode'    => SWOOLE_PROCESS,
     // 'mode'      => SWOOLE_BASE,
     'servers'   => [

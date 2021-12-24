@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 /**
  * This file is part of project hyperf-template.
  *
@@ -12,6 +12,7 @@ declare(strict_types = 1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace App\Service;
 
 use Carbon\Carbon;
@@ -34,7 +35,7 @@ class BitmapService
      */
     public function __construct(string $keyPrefix = 'user:signing', string $keyCarbonFormat = '')
     {
-        $this->redis = app()->get(Redis::class);
+        $this->redis = di(Redis::class);
         $this->key   = config('cache.default.prefix') . ':' . $keyPrefix .
                        (empty($keyCarbonFormat) ? '' : ':' . Carbon::now()->format($keyCarbonFormat));
     }

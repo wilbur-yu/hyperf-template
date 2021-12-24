@@ -43,8 +43,7 @@ class ResolverDispatcher implements ResolverInterface
             return $definition->resolve($this->container);
         }
 
-        $resolver = $this->getDefinitionResolver($definition);
-        return $resolver->resolve($definition, $parameters);
+        return $this->getDefinitionResolver($definition)->resolve($definition, $parameters);
     }
 
     /**
@@ -59,8 +58,7 @@ class ResolverDispatcher implements ResolverInterface
             return $definition->isResolvable($this->container);
         }
 
-        $resolver = $this->getDefinitionResolver($definition);
-        return $resolver->isResolvable($definition, $parameters);
+        return $this->getDefinitionResolver($definition)->isResolvable($definition, $parameters);
     }
 
     /**

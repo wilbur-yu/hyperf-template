@@ -21,21 +21,22 @@ use Hyperf\Config\Annotation\Value;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\Guzzle\CoroutineHandler;
 use Hyperf\HttpServer\Contract\RequestInterface;
+use Hyperf\Utils\Context;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\Request;
-use Psr\Http\Message\ServerRequestInterface;
+
 /**
  * Class WechatFactory.
  *
- * @method \EasyWeChat\Payment\Application         payment(?string $name = null)
- * @method \EasyWeChat\MiniProgram\Application     miniProgram(?string $name = null)
- * @method \EasyWeChat\OpenPlatform\Application    openPlatform(?string $name = null)
- * @method \EasyWeChat\OfficialAccount\Application officialAccount(?string $name = null)
- * @method \EasyWeChat\BasicService\Application    basicService(?string $name = null)
- * @method \EasyWeChat\Work\Application            work(?string $name = null)
- * @method \EasyWeChat\OpenWork\Application        openWork(?string $name = null)
+ * @method \EasyWeChat\Payment\Application         payment(?string $name = null, ...$options)
+ * @method \EasyWeChat\MiniProgram\Application     miniProgram(?string $name = null, ...$options)
+ * @method \EasyWeChat\OpenPlatform\Application    openPlatform(?string $name = null, ...$options)
+ * @method \EasyWeChat\OfficialAccount\Application officialAccount(?string $name = null, ...$options)
+ * @method \EasyWeChat\BasicService\Application    basicService(?string $name = null, ...$options)
+ * @method \EasyWeChat\Work\Application            work(?string $name = null, ...$options)
+ * @method \EasyWeChat\OpenWork\Application        openWork(?string $name = null, ...$options)
  * @method Application                             microMerchant()
  */
 class WechatFactory
@@ -51,12 +52,16 @@ class WechatFactory
         return $this->make($name, ...$arguments);
     }
 
-    public function make(string $service, $name = null): ServiceContainer
+    public function make(string $service, $name = null, bool $isRebindRequest = false): ServiceContainer
     {
         $service = Str::snake($service);
         $config = null === $name ? $this->config[$service]['default'] : $this->config[$service][$name];
 
         $app = Factory::make($service, $config);
+
+        if ($isRebindRequest) {
+            $app = $this->rebindRequest($app);
+        }
 
         $handler = new CoroutineHandler();
 
@@ -69,7 +74,7 @@ class WechatFactory
         $app['guzzle_handler'] = $handler;
 
         // 替换 cache
-        $app['cache'] = $this->container->get(CacheInterface::class);
+        $app['cache'] = di(CacheInterface::class);
 
         // 如果使用的是 OfficialAccount，则还需要设置以下参数
         if ($app instanceof \EasyWeChat\OfficialAccount\Application) {
@@ -78,23 +83,30 @@ class WechatFactory
                 'handler' => $stack,
             ]);
         }
-        // $appRequest = $this->container->get(RequestInterface::class);
-        // $get = $appRequest->getQueryParams();
-        // $post = $appRequest->getParsedBody();
-        // $cookie = $appRequest->getCookieParams();
-        // $uploadFiles = $appRequest->getUploadedFiles() ?? [];
-        // $server = $appRequest->getServerParams();
-        // $xml = $appRequest->getBody()->getContents();
-        // $files = [];
-        // /** @var \Hyperf\HttpMessage\Upload\UploadedFile $v */
-        // foreach ($uploadFiles as $k => $v) {
-        //     $files[$k] = $v->toArray();
-        // }
-        // $request = new Request($get, $post, [], $cookie, $files, $server, $xml);
-        // $request->headers = new HeaderBag($appRequest->getHeaders());
-        // $app->rebind('request', $request);
 
         $app->rebind('cache', cache());
+
+        return $app;
+    }
+
+    protected function rebindRequest(ServiceContainer $app): ServiceContainer
+    {
+        $request = Context::get(RequestInterface::class);
+
+        $get = $request->getQueryParams();
+        $post = $request->getParsedBody();
+        $cookie = $request->getCookieParams();
+        $uploadFiles = $request->getUploadedFiles() ?? [];
+        $server = $request->getServerParams();
+        $xml = $request->getBody()->getContents();
+        $files = [];
+        /** @var \Hyperf\HttpMessage\Upload\UploadedFile $v */
+        foreach ($uploadFiles as $k => $v) {
+            $files[$k] = $v->toArray();
+        }
+        $newRequest = new Request($get, $post, [], $cookie, $files, $server, $xml);
+        $newRequest->headers = new HeaderBag($request->getHeaders());
+        $app->rebind('request', $newRequest);
 
         return $app;
     }

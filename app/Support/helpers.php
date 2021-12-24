@@ -12,8 +12,10 @@ declare(strict_types=1);
 use App\Kernel\Contract\CacheInterface;
 use App\Kernel\Contract\ResponseInterface;
 use App\Kernel\Log\Log;
-use App\Kernel\Server\RouteCollector;
+use App\Kernel\Http\RouteCollector;
 use Carbon\Carbon;
+use Hyperf\AsyncQueue\Driver\DriverFactory;
+use Hyperf\AsyncQueue\Driver\DriverInterface;
 use Hyperf\Contract\SessionInterface;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Contract\TranslatorInterface;
@@ -24,6 +26,10 @@ use Hyperf\Server\ServerFactory;
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Str;
 use Hyperf\Validation\Contract\ValidatorFactoryInterface;
+use HyperfExt\Auth\Contracts\AuthManagerInterface;
+use HyperfExt\Auth\Contracts\GuardInterface;
+use HyperfExt\Auth\Contracts\StatefulGuardInterface;
+use HyperfExt\Auth\Contracts\StatelessGuardInterface;
 use JetBrains\PhpStorm\Pure;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -31,20 +37,55 @@ use Psr\Log\LoggerInterface;
 use Swoole\Server;
 use Swoole\WebSocket\Frame;
 
+if (!function_exists('env_is_local')) {
+    function env_is_local(): bool
+    {
+        return config('app_env') === 'dev';
+    }
+}
+
+if (!function_exists('env_is_production')) {
+    function env_is_production(): bool
+    {
+        return config('app_env') === 'prod';
+    }
+}
+
+if (!function_exists('env_is_test')) {
+    function env_is_test(): bool
+    {
+        return config('app_env') === 'test';
+    }
+}
+
 if (!function_exists('locale')) {
+    /**
+     * @return string
+     */
     function locale(): string
     {
-        return app()->get(TranslatorInterface::class)->getLocale();
+        return di(TranslatorInterface::class)->getLocale();
+    }
+}
+
+if (!function_exists('auth')) {
+    /**
+     * hyperf-ext/auth: Auth认证辅助方法.
+     */
+    function auth(?string $guard = null): StatefulGuardInterface|GuardInterface|StatelessGuardInterface
+    {
+        if (is_null($guard)) {
+            $guard = config('auth.default.guard');
+        }
+
+        return make(AuthManagerInterface::class)->guard($guard);
     }
 }
 
 if (!function_exists('route')) {
     function route(string $name, array $variables = [], string $server = 'http'): string
     {
-        $container = container();
-        $collector = $container->get(RouteCollector::class);
-
-        return $collector->getPath($name, $variables, $server);
+        return di(RouteCollector::class)->getPath($name, $variables, $server);
     }
 }
 
@@ -114,27 +155,18 @@ if (!function_exists('hide_str')) {
     }
 }
 
-if (!function_exists('app')) {
-    #[Pure]
-    function app(): ContainerInterface
-    {
-        return container();
-    }
-}
-
 if (!function_exists('di')) {
-    #[Pure]
-    function di(): ContainerInterface
+    function di(string $class)
     {
-        return container();
+        return container()->get($class);
     }
 }
 
-if (!function_exists('orderNo')) {
+if (!function_exists('order_no')) {
     /**
      * 支持中小型支付系统，单机房生成订单号QPS<=1w，保证订单号绝对唯一
      */
-    function orderNo(string $prefix = ''): string
+    function order_no(string $prefix = ''): string
     {
         return $prefix.date('YmdHis').
                substr(
@@ -166,16 +198,9 @@ if (!function_exists('container')) {
 }
 
 if (!function_exists('format_throwable')) {
-    /**
-     * Format a throwable to string.
-     *
-     * @param  \Throwable  $throwable
-     *
-     * @return string
-     */
     function format_throwable(Throwable $throwable): string
     {
-        return di()->get(FormatterInterface::class)->format($throwable);
+        return di(FormatterInterface::class)->format($throwable);
     }
 }
 
@@ -197,7 +222,7 @@ if (!function_exists('throw_if')) {
             throw (is_string($exception) ? new $exception(...$parameters) : $exception);
         }
 
-        return $condition;
+        return false;
     }
 }
 
@@ -219,18 +244,15 @@ if (!function_exists('throw_unless')) {
             throw (is_string($exception) ? new $exception(...$parameters) : $exception);
         }
 
-        return $condition;
+        return true;
     }
 }
 
 // server 实例 基于 swoole server
 if (!function_exists('server')) {
-    /**
-     * @return \Swoole\Coroutine\Server|\Swoole\Server
-     */
     function server(): Server|Swoole\Coroutine\Server
     {
-        return container()->get(ServerFactory::class)->getServer()->getServer();
+        return di(ServerFactory::class)->getServer()->getServer();
     }
 }
 
@@ -240,7 +262,7 @@ if (!function_exists('get_client_ip')) {
         /**
          * @var RequestInterface $request
          */
-        $request = container()->get(RequestInterface::class);
+        $request = di(RequestInterface::class);
         $ip_addr = $request->getHeaderLine('x-forwarded-for');
         if (verify_ip($ip_addr)) {
             return $ip_addr;
@@ -270,8 +292,11 @@ if (!function_exists('verify_ip')) {
 }
 
 if (!function_exists('filter_emoji')) {
-    function filter_emoji($str): string
+    function filter_emoji(?string $str = null): string|null
     {
+        if ($str === null) {
+            return $str;
+        }
         $str = preg_replace_callback(
             '/./u',
             static function (array $match) {
@@ -288,30 +313,32 @@ if (!function_exists('filter_emoji')) {
 if (!function_exists('frame')) {
     /**
      * websocket frame 实例.
+     * @return \Swoole\WebSocket\Frame
      */
     function frame(): Frame
     {
-        return container()->get(Frame::class);
+        return di(Frame::class);
     }
 }
 
 if (!function_exists('cache')) {
     /**
-     * 缓存实例 简单的缓存.
+     * 简单缓存实例
+     * @return \App\Kernel\Contract\CacheInterface
      */
     function cache(): CacheInterface
     {
-        return container()->get(CacheInterface::class);
+        return di(CacheInterface::class);
     }
 }
 
 if (!function_exists('stdLog')) {
     /**
-     * 控制台日志.
+     * @return \Hyperf\Contract\StdoutLoggerInterface
      */
     function stdLog(): StdoutLoggerInterface
     {
-        return container()->get(StdoutLoggerInterface::class);
+        return di(StdoutLoggerInterface::class);
     }
 }
 
@@ -328,14 +355,14 @@ if (!function_exists('logger')) {
 if (!function_exists('request')) {
     function request(): RequestInterface
     {
-        return container()->get(RequestInterface::class);
+        return di(RequestInterface::class);
     }
 }
 
 if (!function_exists('response')) {
     function response(): ResponseInterface
     {
-        return container()->get(ResponseInterface::class);
+        return di(ResponseInterface::class);
     }
 }
 
@@ -508,7 +535,7 @@ if (!function_exists('session')) {
      */
     function session(): SessionInterface
     {
-        return app()->get(SessionInterface::class);
+        return di(SessionInterface::class);
     }
 }
 if (!function_exists('today')) {
@@ -525,18 +552,6 @@ if (!function_exists('today')) {
         return Carbon::today($tz);
     }
 }
-if (!function_exists('event')) {
-    /**
-     * @license https://github.com/friendsofhyperf/helpers
-     * Dispatch an event and call the listeners.
-     *
-     * @return \Psr\EventDispatcher\EventDispatcherInterface
-     */
-    function event(): EventDispatcherInterface
-    {
-        return app()->get(EventDispatcherInterface::class);
-    }
-}
 if (!function_exists('validator')) {
     /**
      * @license https://github.com/friendsofhyperf/helpers
@@ -547,7 +562,7 @@ if (!function_exists('validator')) {
      * @param  array  $messages
      * @param  array  $customAttributes
      *
-     * @return \Hyperf\Validation\Contract\ValidatorFactoryInterface|\Hyperf\Contract\ValidatorInterface
+     * @return \Hyperf\Contract\ValidatorInterface|\Hyperf\Validation\Contract\ValidatorFactoryInterface
      */
     function validator(
         array $data = [],
@@ -556,7 +571,7 @@ if (!function_exists('validator')) {
         array $customAttributes = []
     ): ValidatorFactoryInterface|ValidatorInterface {
         /** @var \Hyperf\Validation\Contract\ValidatorFactoryInterface $factory */
-        $factory = app()->get(ValidatorFactoryInterface::class);
+        $factory = di(ValidatorFactoryInterface::class);
 
         if (func_num_args() === 0) {
             return $factory;
@@ -565,4 +580,22 @@ if (!function_exists('validator')) {
         return $factory->make($data, $rules, $messages, $customAttributes);
     }
 }
+if (!function_exists('event')) {
+    /**
+     * @license https://github.com/friendsofhyperf/helpers
+     * Dispatch an event and call the listeners.
+     *
+     * @return \Psr\EventDispatcher\EventDispatcherInterface
+     */
+    function event(): EventDispatcherInterface
+    {
+        return di(EventDispatcherInterface::class);
+    }
+}
 
+if (!function_exists('job')) {
+    function job(string $driver = 'default'): DriverInterface
+    {
+        return di(DriverFactory::class)->get($driver);
+    }
+}

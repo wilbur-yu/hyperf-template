@@ -21,7 +21,7 @@ use App\Middleware\WithRequestSchemeMiddleware;
 return [
     'http' => [
         WithRequestSchemeMiddleware::class,
-        DebugMiddleware::class,
         CorsMiddleware::class,
+        DebugMiddleware::class,
     ],
 ];

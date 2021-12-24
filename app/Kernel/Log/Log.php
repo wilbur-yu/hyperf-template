@@ -20,7 +20,6 @@ class Log
     {
         return 'dev' === config('app_env')
             ? stdLog()
-            : container()->get(LoggerFactory::class)->get($channel, $group);
-        // return container()->get(LoggerFactory::class)->get($channel, $group);
+            : di(LoggerFactory::class)->get($channel, $group);
     }
 }

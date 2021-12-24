@@ -1,17 +1,14 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
+
 /**
- * This file is part of project hyperf-template.
+ * This file is part of project burton.
  *
- * @author   wenber.yu@creative-life.club
+ * @author   wenbo@wenber.club
  * @link     https://github.com/wilbur-yu/hyperf-template
- *
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace App\Kernel\Log;
 
 use Hyperf\Contract\ConfigInterface;
@@ -29,19 +26,10 @@ use function sprintf;
  */
 class StdoutLogger implements StdoutLoggerInterface
 {
-    /**
-     * @var \Hyperf\Contract\ConfigInterface
-     */
     private ConfigInterface $config;
 
-    /**
-     * @var OutputInterface
-     */
     private OutputInterface $output;
 
-    /**
-     * @var array
-     */
     private array $tags = [
     ];
 
@@ -65,14 +53,14 @@ class StdoutLogger implements StdoutLoggerInterface
     public function log($level, $message, array $context = []): void
     {
         $config = $this->config->get(StdoutLoggerInterface::class, ['log_level' => []]);
-        if (! in_array($level, $config['log_level'], true)) {
+        if (!in_array($level, $config['log_level'], true)) {
             return;
         }
 
         $message = $this->getMessage($message, $this->tags, $level);
-        if (! empty($context)) {
+        if (!empty($context)) {
             $contextLine = Json::encode($context, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-            $message     .= ' ' . $contextLine;
+            $message .= ' '.$contextLine;
         }
 
         $this->output->writeln($message);
@@ -143,12 +131,12 @@ class StdoutLogger implements StdoutLoggerInterface
             default => 'info',
         };
 
-        $template     = sprintf('<%s>[%s]</>', $tag, strtoupper($level));
+        $template = sprintf('<%s>[%s]</>', $tag, strtoupper($level));
         $implodedTags = '';
         foreach ($tags as $value) {
-            $implodedTags .= (' [' . $value . ']');
+            $implodedTags .= (' ['.$value.']');
         }
 
-        return sprintf($template . $implodedTags . ' %s', $message);
+        return sprintf($template.$implodedTags.' %s', $message);
     }
 }

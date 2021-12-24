@@ -25,7 +25,8 @@
         "ext-redis": "*",
         "ext-swoole": "*",
         "ext-zend-opcache": "*",
-        "friendsofhyperf/http-client": "^0.1.6",
+        "friendsofhyperf/http-client": "^0.1.9",
+        "hyperf-ext/auth": "^2.2",
         "hyperf-ext/encryption": "^2.2",
         "hyperf-ext/hashing": "^2.2",
         "hyperf/cache": "~2.2.0",
@@ -87,7 +88,6 @@
     },
     "scripts": {
         "pre-install-cmd": "Installer\\Script::install",
-        "pre-update-cmd": "Installer\\Script::install",
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
         ],

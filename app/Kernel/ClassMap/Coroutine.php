@@ -55,7 +55,7 @@ class Coroutine
      */
     public static function create(callable $callable): int
     {
-        return di()->get(Go::class)->create($callable);
+        return di(Go::class)->create($callable);
     }
 
     public static function inCoroutine(): bool

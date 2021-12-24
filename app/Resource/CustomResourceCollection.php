@@ -20,14 +20,14 @@ class CustomResourceCollection extends ResourceCollection
     protected array $hidden = [];
     private bool $hide = true;
 
-    public function hide(array $fields): CustomResourceCollection
+    public function makeHidden(array $fields): CustomResourceCollection
     {
         $this->hidden = $fields;
 
         return $this;
     }
 
-    public function show(array $fields): CustomResourceCollection
+    public function makeVisible(array $fields): CustomResourceCollection
     {
         $this->hidden = $fields;
         $this->hide = false;
