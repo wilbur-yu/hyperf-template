@@ -19,7 +19,7 @@ use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 interface ResponseInterface extends BaseResponseInterface, PsrResponseInterface
 {
     public function success(
-        $data = [],
+        mixed $data = [],
         string $message = 'success',
         int $code = HttpCode::OK
     ): PsrResponseInterface;
