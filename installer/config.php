@@ -263,7 +263,7 @@ return [
                     'resources' => [
                         'resources/auth/auth.php' => 'config/autoload/auth.php',
                         'resources/auth/jwt.php' => 'config/autoload/jwt.php',
-                        'resources/auth/Auth' => 'app',
+                        'resources/auth/Auth' => 'app/Auth',
                     ],
                 ],
             ],
