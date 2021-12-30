@@ -18,35 +18,8 @@ use Hyperf\Utils\Context;
 use Psr\Http\Message\ServerRequestInterface;
 use HyperfExt\Auth\Middlewares\AbstractAuthenticateMiddleware;
 
-class AuthorizationMiddleware extends AbstractAuthenticateMiddleware //implements MiddlewareInterface //
+class AuthorizationMiddleware extends AbstractAuthenticateMiddleware
 {
-    // protected ContainerInterface $container;
-    //
-    // protected Jwt $jwt;
-    //
-    // protected Manager $jwtManager;
-
-    // public function __construct(ContainerInterface $container, JwtFactoryInterface $jwtFactory)
-    // {
-    //     $this->container = $container;
-    //     $this->jwt = $jwtFactory->make();
-    //     $this->jwtManager = $this->jwt->getManager();
-    // }
-    //
-    // public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-    // {
-    //     try {
-    //         $this->jwt->parseToken()->checkOrFail();
-    //         $guard = $this->jwt->getClaim('guard');
-    //         Context::set(GuardConstant::GUARD_CURRENT_KEY, $guard);
-    //         Context::set($guard, auth($guard)->user());
-    //     } catch (Throwable $e) {
-    //         throw new AuthorizationException(BusCode::SERVICE_UNAUTHORIZED, $e->getMessage());
-    //     }
-    //
-    //     return $handler->handle($request);
-    // }
-
     protected function authenticate(ServerRequestInterface $request, array $guards): void
     {
         if (empty($guards)) {

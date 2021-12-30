@@ -13,10 +13,27 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
+use App\RateLimiter\ThrottleRequest;
+use WilburYu\HyperfCacheExt\CounterLimiting\Limit;
+use WilburYu\HyperfCacheExt\Driver\RedisDriver;
+use WilburYu\HyperfCacheExt\Utils\Packer\PhpSerializerPacker;
+
 return [
     'default' => [
-        'driver' => App\Kernel\Cache\Driver\RedisDriver::class,
-        'packer' => App\Kernel\Utils\Packer\PhpSerializerPacker::class,
+        'driver' => RedisDriver::class,
+        'packer' => PhpSerializerPacker::class,
         'prefix' => env('APP_NAME', 'skeleton') . ':cache:',
+    ],
+    'limiter' => [
+        'max_attempts' => 5,
+        'decay_minutes' => 1,
+        'prefix' => 'counter-rate-limit:',
+        'for' => [
+            'common' => static function () {
+                return Limit::perMinute(0);
+            },
+        ],
+        'key' => ThrottleRequest::key(),
     ],
 ];

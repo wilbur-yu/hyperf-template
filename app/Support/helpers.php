@@ -9,7 +9,6 @@ declare(strict_types=1);
  * @link     https://github.com/wilbur-yu/hyperf-template
  */
 
-use App\Kernel\Contract\CacheInterface;
 use App\Kernel\Contract\ResponseInterface;
 use App\Kernel\Log\Log;
 use App\Kernel\Http\RouteCollector;
@@ -318,17 +317,6 @@ if (!function_exists('frame')) {
     function frame(): Frame
     {
         return di(Frame::class);
-    }
-}
-
-if (!function_exists('cache')) {
-    /**
-     * 简单缓存实例
-     * @return \App\Kernel\Contract\CacheInterface
-     */
-    function cache(): CacheInterface
-    {
-        return di(CacheInterface::class);
     }
 }
 
