@@ -73,10 +73,6 @@ if (!function_exists('auth')) {
      */
     function auth(?string $guard = null): StatefulGuardInterface|GuardInterface|StatelessGuardInterface
     {
-        if (is_null($guard)) {
-            $guard = config('auth.default.guard');
-        }
-
         return make(AuthManagerInterface::class)->guard($guard);
     }
 }
