@@ -13,10 +13,10 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 $dependencies = [
-    Hyperf\Dispatcher\HttpDispatcher::class => App\Kernel\Server\HttpDispatcher::class,
-    Hyperf\HttpServer\Contract\ResponseInterface::class => App\Kernel\Server\Response::class,
-    Psr\Http\Message\ResponseInterface::class => App\Kernel\Server\Response::class,
-    App\Kernel\Contract\ResponseInterface::class => App\Kernel\Server\Response::class,
+    Hyperf\Dispatcher\HttpDispatcher::class => App\Kernel\Http\HttpDispatcher::class,
+    Hyperf\HttpServer\Contract\ResponseInterface::class => App\Kernel\Http\Response::class,
+    Psr\Http\Message\ResponseInterface::class => App\Kernel\Http\Response::class,
+    App\Kernel\Contract\ResponseInterface::class => App\Kernel\Http\Response::class,
     Hyperf\Server\Listener\AfterWorkerStartListener::class => App\Kernel\Listener\WorkerStartListener::class,
 ];
 $appEnv = env('APP_ENV', 'dev');
