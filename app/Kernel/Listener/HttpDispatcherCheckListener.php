@@ -9,9 +9,9 @@ declare(strict_types=1);
  * @link     https://github.com/wilbur-yu/hyperf-template
  */
 
-namespace App\Listener;
+namespace App\Kernel\Listener;
 
-use App\Kernel\Server\HttpDispatcher as AppHttpDispatcher;
+use App\Kernel\Http\HttpDispatcher as AppHttpDispatcher;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Dispatcher\HttpDispatcher;
 use Hyperf\Event\Annotation\Listener;

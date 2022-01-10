@@ -15,17 +15,16 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Kernel\Contract\ResponseInterface;
+use App\Support\Trait\UserTrait;
+use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Contract\RequestInterface;
-use Psr\Container\ContainerInterface;
 
 abstract class AbstractController
 {
-    protected RequestInterface  $request;
-    protected ResponseInterface $response;
+    use UserTrait;
 
-    public function __construct(protected ContainerInterface $container)
-    {
-        $this->response = $container->get(ResponseInterface::class);
-        $this->request  = $container->get(RequestInterface::class);
-    }
+    #[Inject]
+    protected RequestInterface $request;
+    #[Inject]
+    protected ResponseInterface $response;
 }

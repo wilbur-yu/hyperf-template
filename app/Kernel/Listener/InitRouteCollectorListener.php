@@ -9,9 +9,9 @@ declare(strict_types=1);
  * @link     https://github.com/wilbur-yu/hyperf-template
  */
 
-namespace App\Listener;
+namespace App\Kernel\Listener;
 
-use App\Kernel\Server\RouteCollector;
+use App\Kernel\Http\RouteCollector;
 use Hyperf\Event\Annotation\Listener;
 use Hyperf\Event\Contract\ListenerInterface;
 use Hyperf\Framework\Event\BeforeWorkerStart;

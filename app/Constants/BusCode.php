@@ -32,6 +32,11 @@ class BusCode extends AbstractConstants
     public const SUCCESS = 200;
 
     /**
+     * @Message("系统: Server Error！")
+     */
+    public const SERVER_ERROR = 5000;
+
+    /**
      * @Message("未授权")
      */
     public const SERVICE_UNAUTHORIZED = 4001;

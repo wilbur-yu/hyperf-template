@@ -143,14 +143,14 @@ class Response extends BaseResponse implements CustomResponseInterface
             $body = isset($data['data']) ? array_merge($body, $data) : array_merge($body, ['data' => $data]);
         }
 
-        return $this->withCustomHeaders(['content-type' => 'application/json; charset=utf-8'])
+        return $this->withAddedHeaders(['content-type' => 'application/json; charset=utf-8'])
             ->withStatus($code)
             ->json($body);
     }
 
-    public function withCustomHeaders(array $headers): PsrResponseInterface
+    public function withAddedHeaders(array $headers): PsrResponseInterface
     {
-        $config = config('response.headers');
+        $config = config('response.headers') ?? [];
         $headers = array_merge($config, $headers);
 
         if (!Context::has(ResponseInterface::class)) {

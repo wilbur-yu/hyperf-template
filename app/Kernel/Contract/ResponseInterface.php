@@ -31,5 +31,5 @@ interface ResponseInterface extends BaseResponseInterface, PsrResponseInterface
         int $code = HttpCode::OK,
     ): PsrResponseInterface;
 
-    public function withCustomHeaders(array $headers): PsrResponseInterface;
+    public function withAddedHeaders(array $headers): PsrResponseInterface;
 }

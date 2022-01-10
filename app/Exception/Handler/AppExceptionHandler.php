@@ -15,8 +15,11 @@ declare(strict_types=1);
 
 namespace App\Exception\Handler;
 
+use App\Constants\BusCode;
 use App\Constants\HttpCode;
+use App\Exception\AuthorizationException;
 use App\Exception\BusinessException;
+use App\Exception\Formatter\AppFormatter;
 use App\Kernel\Contract\ResponseInterface;
 use Hyperf\Di\Exception\CircularDependencyException;
 use Hyperf\ExceptionHandler\ExceptionHandler;
@@ -25,6 +28,7 @@ use Hyperf\Utils\Arr;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as BaseResponseInterface;
 use Throwable;
+use WilburYu\HyperfCacheExt\Exception\CounterRateLimitException;
 
 class AppExceptionHandler extends ExceptionHandler
 {
@@ -37,27 +41,29 @@ class AppExceptionHandler extends ExceptionHandler
 
     public function handle(Throwable $throwable, BaseResponseInterface $response): BaseResponseInterface
     {
-        switch (true) {
-            case $throwable instanceof HttpException:
-                return $this->response->handleException($throwable);
-            case $throwable instanceof BusinessException:
-                return $this->response->fail(
-                    $throwable->getCode(),
-                    $throwable->getMessage(),
-                    HttpCode::HTTP_OK,
-                    $this->convertExceptionToArray($throwable)
-                );
-            case $throwable instanceof CircularDependencyException:
-                return $this->response->fail(HttpCode::SERVER_ERROR, $throwable->getMessage());
-        }
         $this->stopPropagation();
+        $status = $throwable->getCode();
+        $status = is_string($status) ? (int)$status : $status;
+        if ($throwable instanceof AuthorizationException) {
+            $code = HttpCode::UNAUTHORIZED;
+        }
+        if ($this->isHttpException($throwable)) {
+            $code = $throwable->getStatusCode();
+        }
 
-        return $this->response->fail(
-            HttpCode::SERVER_ERROR,
-            $throwable->getMessage(),
-            HttpCode::HTTP_OK,
-            $this->convertExceptionToArray($throwable)
-        );
+        if ($throwable instanceof CounterRateLimitException) {
+            $headers = $throwable->getHeaders();
+            $code = $throwable->getCode();
+        }
+
+        return $this->response
+            ->withAddedHeaders($headers ?? [])
+            ->fail(
+                $status ?: BusCode::SERVER_ERROR,
+                $throwable->getMessage(),
+                $this->convertExceptionToArray($throwable),
+                code: $code ?? HttpCode::SERVER_ERROR
+            );
     }
 
     public function isValid(Throwable $throwable): bool
@@ -67,15 +73,9 @@ class AppExceptionHandler extends ExceptionHandler
 
     protected function convertExceptionToArray(Throwable $throwable): array
     {
-        return config('app_debug', false) ? [
-            'message' => $throwable->getMessage(),
-            'exception' => get_class($throwable),
-            'file' => $throwable->getFile(),
-            'line' => $throwable->getLine(),
-            'trace' => collect($throwable->getTrace())->map(function ($trace) {
-                return Arr::except($trace, ['args']);
-            })->all(),
-        ] : [
+        $format = make(AppFormatter::class)->format($throwable, !env_is_production());
+
+        return config('app_debug', false) ? $format : [
             'message' => $this->isHttpException($throwable) ? $throwable->getMessage() : 'Server Error',
         ];
     }
