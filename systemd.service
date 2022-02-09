@@ -1,0 +1,31 @@
+[Unit]
+# 描述
+Description=Burton Api Server
+# 启动的顺序, 在nginx启动后才能启动
+# After=nginx.service
+[Service]
+Type=simple
+LimitNOFILE=65535
+# !!!这里修改为 Hyperf 项目根目录
+WorkingDirectory=/home/www/projects/burton-api-server/current
+# 这里可以指定运行的用户
+User=www
+Group=www
+# 启动命令，php 建议使用绝对路径
+ExecStart=/bin/php ./bin/hyperf.php start
+# 停止命令，使用 Hyperf 提供的优雅停止方法
+ExecStop=/bin/kill -15 $MAINPID
+# 可以控制服务在什么情况下重新启动
+# 异常退出时重新启动: on-failure
+# 进程挂掉会自动拉起: always
+Restart=always
+# 超时参数
+TimeoutStopSec=62s
+# 重新启动的前等待的时间
+RestartSec=5s
+# 指定正确退出的代码, Hyperf 的安全退出代码是 0
+SuccessExitStatus=0
+
+[Install]
+# 指定在 多用户 模式下启动，就是一般的命令行模式啦，也包括图形界面模式
+WantedBy=multi-user.target
