@@ -110,7 +110,7 @@ return [
             'version' => '^2.1',
         ],
         'hyperf/flysystem-oss' => [
-            'version' => '^2.1',
+            'version' => '^1.0',
         ],
     ],
     'require-dev' => [
