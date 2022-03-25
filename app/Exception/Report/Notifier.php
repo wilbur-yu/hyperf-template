@@ -68,7 +68,7 @@ md;
     {
         Factory::xiZhi()
             ->setType('single')
-            ->setToken('XZad45e6c2bee813d7e9ec46023b161943')
+            ->setToken('')
             ->setMessage(
                 new XiZhiMessage(
                     $title,
