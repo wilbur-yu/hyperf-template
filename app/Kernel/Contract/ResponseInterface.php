@@ -11,7 +11,6 @@ declare(strict_types=1);
 
 namespace App\Kernel\Contract;
 
-use App\Constants\BusCode;
 use App\Constants\HttpCode;
 use Hyperf\HttpServer\Contract\ResponseInterface as BaseResponseInterface;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
@@ -25,7 +24,7 @@ interface ResponseInterface extends BaseResponseInterface, PsrResponseInterface
     ): PsrResponseInterface;
 
     public function fail(
-        int $status = BusCode::SUCCESS,
+        int $status = HttpCode::OK,
         string $message = '',
         array $errors = [],
         int $code = HttpCode::OK,

@@ -22,7 +22,7 @@ class Money
         int|float|string $n1,
         string $symbol,
         int|float|string $n2,
-        int|string $scale = 2
+        int $scale = 2
     ): string {
         return match ($symbol) {
             '+' => bcadd((string)$n1, (string)$n2, $scale),
@@ -39,15 +39,15 @@ class Money
     }
 
     #[Pure]
-    public static function yuanToFen(int|float|string $price): int
+    public static function yuanToFen(int|float|string $price, int $scale = 2): int
     {
         return (int)self::calc(100, '*', $price);
     }
 
     #[Pure]
-    public static function fenToYuan(int|float|string $price): string
+    public static function fenToYuan(int|float|string $price, int $scale = 2): string
     {
-        return self::calc(self::format($price), '/', 100);
+        return self::calc(self::format($price), '/', 100, $scale);
     }
 
     /**

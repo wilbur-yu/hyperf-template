@@ -12,11 +12,11 @@ declare(strict_types=1);
 namespace App\Middleware;
 
 use App\Constants\BusCode;
-use App\Constants\GuardConstant;
+use App\Constants\BusConstant\GuardConstant;
 use App\Exception\AuthorizationException;
 use Hyperf\Utils\Context;
-use Psr\Http\Message\ServerRequestInterface;
 use HyperfExt\Auth\Middlewares\AbstractAuthenticateMiddleware;
+use Psr\Http\Message\ServerRequestInterface;
 
 class AuthorizationMiddleware extends AbstractAuthenticateMiddleware
 {

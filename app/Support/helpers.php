@@ -66,6 +66,42 @@ if (!function_exists('locale')) {
         return di(TranslatorInterface::class)->getLocale();
     }
 }
+if (!function_exists('array_reduces')) {
+    /**
+     * @param null $carry
+     *
+     * @return mixed|null
+     */
+    function array_reduces(array $array, callable $callback, $carry = null): mixed
+    {
+        foreach ($array as $key => $value) {
+            $carry = $callback($carry, $value, $key);
+        }
+
+        return $carry;
+    }
+}
+/**
+ * Transform the given value if it is present.
+ *
+ * @param  mixed       $value
+ * @param  callable    $callback
+ * @param  mixed|null  $default
+ *
+ * @return mixed|null
+ */
+function transform(mixed $value, callable $callback, mixed $default = null): mixed
+{
+    if (filled($value)) {
+        return $callback($value);
+    }
+
+    if (is_callable($default)) {
+        return $default($value);
+    }
+
+    return $default;
+}
 
 if (!function_exists('auth')) {
     /**

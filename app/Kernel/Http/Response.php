@@ -15,12 +15,12 @@ use App\Constants\BusCode;
 use App\Constants\HttpCode;
 use App\Kernel\Contract\ResponseInterface as CustomResponseInterface;
 use App\Kernel\Log\AppendRequestProcessor;
+use Hyperf\Context\Context;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\HttpServer\Response as BaseResponse;
 use Hyperf\Paginator\AbstractPaginator;
 use Hyperf\Resource\Json\JsonResource;
 use Hyperf\Resource\Json\ResourceCollection;
-use Hyperf\Utils\Context;
 use Hyperf\Utils\Contracts\Arrayable;
 use JetBrains\PhpStorm\ArrayShape;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
@@ -150,7 +150,7 @@ class Response extends BaseResponse implements CustomResponseInterface
 
     public function withAddedHeaders(array $headers): PsrResponseInterface
     {
-        $config = config('response.headers') ?? [];
+        $config = config('response.headers');
         $headers = array_merge($config, $headers);
 
         if (!Context::has(ResponseInterface::class)) {

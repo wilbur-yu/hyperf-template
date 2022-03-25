@@ -106,6 +106,12 @@ return [
         'hyperf-ext/auth' => [
             'version' => '^2.1',
         ],
+        'hyperf/filesystem' => [
+            'version' => '^2.1',
+        ],
+        'hyperf/flysystem-oss' => [
+            'version' => '^2.1',
+        ],
     ],
     'require-dev' => [
     ],
@@ -265,6 +271,43 @@ return [
                         'resources/auth/jwt.php' => 'config/autoload/jwt.php',
                         'resources/auth/Auth/Driver/ModelUserCacheProvider.php' => 'app/Auth',
                         'resources/auth/Auth/Guard/SsoGuard.php' => 'app/Auth',
+                    ],
+                ],
+            ],
+        ],
+        'filesystem' => [
+            'question' => 'Do you want to use hyperf/filesystem component ?',
+            'default' => 'n',
+            'required' => false,
+            'force' => false,
+            'custom-package' => true,
+            'options' => [
+                'y' => [
+                    'name' => 'yes',
+                    'packages' => [
+                        'hyperf/filesystem',
+                    ],
+                    'resources' => [
+                        'resources/filesystem/File.php' => 'app/Support/File.php',
+                        'resources/filesystem/config.php' => 'config/autoload/file.php',
+                    ],
+                ],
+            ],
+        ],
+        'flysystem-oss' => [
+            'question' => 'Do you want to use hyperf/flysystem-oss component ?',
+            'default' => 'n',
+            'required' => false,
+            'force' => false,
+            'custom-package' => true,
+            'options' => [
+                'y' => [
+                    'name' => 'yes',
+                    'packages' => [
+                        'hyperf/flysystem-oss',
+                    ],
+                    'resources' => [
+                        'resources/filesystem/FilesystemExt.php' => 'app/Support/FilesystemExt.php',
                     ],
                 ],
             ],

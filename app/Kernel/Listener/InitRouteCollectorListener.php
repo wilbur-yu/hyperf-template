@@ -16,18 +16,12 @@ use Hyperf\Event\Annotation\Listener;
 use Hyperf\Event\Contract\ListenerInterface;
 use Hyperf\Framework\Event\BeforeWorkerStart;
 use Hyperf\Server\Event\MainCoroutineServerStart;
-use Psr\Container\ContainerInterface;
+
+use function di;
 
 #[Listener]
 class InitRouteCollectorListener implements ListenerInterface
 {
-    protected ContainerInterface $container;
-
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
-    }
-
     public function listen(): array
     {
         return [
@@ -38,6 +32,6 @@ class InitRouteCollectorListener implements ListenerInterface
 
     public function process(object $event): void
     {
-        $this->container->get(RouteCollector::class);
+        di(RouteCollector::class);
     }
 }

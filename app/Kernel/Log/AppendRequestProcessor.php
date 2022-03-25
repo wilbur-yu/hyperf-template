@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 namespace App\Kernel\Log;
 
-use Hyperf\Utils\Context;
+use Hyperf\Context\Context;
 use Monolog\Processor\ProcessorInterface;
 
 class AppendRequestProcessor implements ProcessorInterface

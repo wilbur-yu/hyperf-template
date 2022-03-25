@@ -19,20 +19,6 @@ class AppFormatter
     public function format(Throwable $throwable, bool $isHoldArgs = true): array
     {
         $exception = [];
-        if ($throwable->getPrevious()) {
-            $exception['previous'] = [
-                'exception' => get_class($throwable->getPrevious()),
-                'code' => $throwable->getPrevious()->getCode(),
-                'message' => $throwable->getPrevious()->getMessage(),
-                'custom_data' => $isHoldArgs && is_object($throwable->getPrevious())
-                                 && method_exists(
-                                     $throwable->getPrevious(),
-                                     'getData'
-                                 ) ? $throwable->getPrevious()->getData() : null,
-                'trace' => $isHoldArgs ? $throwable->getPrevious()->getTrace() :
-                    $this->removeKeys($throwable->getPrevious()->getTrace(), ['args']),
-            ];
-        }
         $exception['current'] = [
             'exception' => get_class($throwable),
             'code' => $throwable->getCode(),
@@ -41,6 +27,20 @@ class AppFormatter
                 $throwable->getCustomData() : null,
             'trace' => $isHoldArgs ? $throwable->getTrace() : $this->removeKeys($throwable->getTrace(), ['args']),
         ];
+        if ($throwable->getPrevious()) {
+            $exception['previous'] = [
+                'exception' => get_class($throwable->getPrevious()),
+                'code' => $throwable->getPrevious()->getCode(),
+                'message' => $throwable->getPrevious()->getMessage(),
+                'custom_data' => $isHoldArgs && is_object($throwable->getPrevious())
+                                 && method_exists(
+                                     $throwable->getPrevious(),
+                                     'getCustomData'
+                                 ) ? $throwable->getPrevious()->getCustomData() : null,
+                'trace' => $isHoldArgs ? $throwable->getPrevious()->getTrace() :
+                    $this->removeKeys($throwable->getPrevious()->getTrace(), ['args']),
+            ];
+        }
 
         return $exception;
     }

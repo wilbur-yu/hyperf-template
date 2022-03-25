@@ -12,8 +12,8 @@ declare(strict_types=1);
 namespace App\Kernel\Http;
 
 use App\Exception\RequestNotFoundException;
+use Hyperf\Context\Context;
 use Hyperf\HttpServer\Router\Dispatched;
-use Hyperf\Utils\Context;
 use Psr\Http\Message\ServerRequestInterface;
 
 class RouteContext

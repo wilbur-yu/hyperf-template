@@ -55,7 +55,7 @@ final class Encrypter
             }
             throw new DecryptException(
                 $code ?? BusCode::CRYPT_DECRYPT_FAILED,
-                $errMessage ?? $message ?? $e->getMessage(),
+                $errMessage ?? $message ?? '',
                 previous: !($e instanceof DecryptException) ? $e : null
             );
         }

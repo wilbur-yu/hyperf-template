@@ -14,7 +14,6 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 
-use App\RateLimiter\ThrottleRequest;
 use WilburYu\HyperfCacheExt\CounterLimiting\Limit;
 use WilburYu\HyperfCacheExt\Driver\RedisDriver;
 use WilburYu\HyperfCacheExt\Utils\Packer\PhpSerializerPacker;
@@ -26,7 +25,7 @@ return [
         'prefix' => env('APP_NAME', 'skeleton') . ':cache:',
     ],
     'limiter' => [
-        'max_attempts' => 5,
+        'max_attempts' => 20,
         'decay_minutes' => 1,
         'prefix' => 'counter-rate-limit:',
         'for' => [
@@ -34,6 +33,6 @@ return [
                 return Limit::perMinute(0);
             },
         ],
-        'key' => ThrottleRequest::key(),
+        'key' => null,
     ],
 ];

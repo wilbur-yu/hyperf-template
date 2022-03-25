@@ -18,6 +18,7 @@ $dependencies = [
     Psr\Http\Message\ResponseInterface::class => App\Kernel\Http\Response::class,
     App\Kernel\Contract\ResponseInterface::class => App\Kernel\Http\Response::class,
     Hyperf\Server\Listener\AfterWorkerStartListener::class => App\Kernel\Listener\WorkerStartListener::class,
+    Psr\EventDispatcher\EventDispatcherInterface::class => App\Kernel\Event\EventDispatcherFactory::class,
 ];
 $appEnv = env('APP_ENV', 'dev');
 if ($appEnv === 'prod') {

@@ -17,18 +17,12 @@ use Hyperf\Dispatcher\HttpDispatcher;
 use Hyperf\Event\Annotation\Listener;
 use Hyperf\Event\Contract\ListenerInterface;
 use Hyperf\Framework\Event\BootApplication;
-use Psr\Container\ContainerInterface;
+
+use function di;
 
 #[Listener]
 class HttpDispatcherCheckListener implements ListenerInterface
 {
-    protected ContainerInterface $container;
-
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
-    }
-
     public function listen(): array
     {
         return [
@@ -38,10 +32,10 @@ class HttpDispatcherCheckListener implements ListenerInterface
 
     public function process(object $event): void
     {
-        $dispatcher = $this->container->get(HttpDispatcher::class);
+        $dispatcher = di(HttpDispatcher::class);
 
         if (!$dispatcher instanceof AppHttpDispatcher) {
-            $logger = $this->container->get(StdoutLoggerInterface::class);
+            $logger = di(StdoutLoggerInterface::class);
             $logger->warning(
                 sprintf(
                     'HttpDispatcher is not instanceof %s, please set %s => %s in dependencies.',
