@@ -12,6 +12,7 @@ declare(strict_types=1);
 use App\Kernel\Contract\ResponseInterface;
 use App\Kernel\Log\Log;
 use App\Kernel\Http\RouteCollector;
+use App\Support\AuthCode;
 use Carbon\Carbon;
 use Hyperf\AsyncQueue\Driver\DriverFactory;
 use Hyperf\AsyncQueue\Driver\DriverInterface;
@@ -54,6 +55,20 @@ if (!function_exists('env_is_test')) {
     function env_is_test(): bool
     {
         return config('app_env') === 'test';
+    }
+}
+
+if (!function_exists('encrypt')) {
+    function encrypt($data, int $expiry = 0): string
+    {
+        return di(AuthCode::class)->encrypt($data, $expiry);
+    }
+}
+
+if (!function_exists('decrypt')) {
+    function decrypt(string $encrypt, ?string $message = null): int|array|string
+    {
+        return di(AuthCode::class)->decrypt($encrypt, $message);
     }
 }
 

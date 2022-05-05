@@ -11,22 +11,14 @@ declare(strict_types=1);
 
 namespace App\Middleware;
 
-use App\Exception\AuthorizationException;
-use App\Exception\BusinessException;
-use App\Exception\DecryptException;
-use App\Exception\Formatter\AppFormatter;
-use WilburYu\HyperfCacheExt\Exception\CounterRateLimitException;
-use App\Exception\NotFoundException;
 use App\Kernel\Log\AppendRequestProcessor;
 use App\Kernel\Log\Log;
-use Hyperf\HttpMessage\Exception\HttpException;
-use Hyperf\HttpMessage\Exception\NotFoundHttpException;
-use Hyperf\HttpServer\Request;
-use Hyperf\Utils\Arr;
+use App\Report\Notifier;
+use App\Support\Trait\HasUser;
+use Carbon\Carbon;
+use Hyperf\Context\Context;
+use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\Utils\Codec\Json;
-use Hyperf\Utils\Context;
-use Hyperf\Utils\Coroutine;
-use Hyperf\Utils\Str;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -38,133 +30,142 @@ use function microtime;
 
 class DebugMiddleware implements MiddlewareInterface
 {
-    protected array $dontReport = [
-        DecryptException::class,
-        NotFoundHttpException::class,
-        HttpException::class,
-        NotFoundException::class,
-        BusinessException::class,
-        AuthorizationException::class,
-        DecryptException::class,
-        CounterRateLimitException::class,
-    ];
+    use HasUser;
 
     public function __construct(protected ContainerInterface $container)
     {
     }
 
     /**
-     * @throws \Throwable
+     * @param  \Psr\Http\Message\ServerRequestInterface  $request
+     * @param  \Psr\Http\Server\RequestHandlerInterface  $handler
+     *
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @return \Psr\Http\Message\ResponseInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $startTime = microtime(true);
+        $this->record($request);
 
-        $requestId = Context::getOrSet(AppendRequestProcessor::LOG_REQUEST_ID_KEY, uniqid('', true));
-        Context::getOrSet(AppendRequestProcessor::LOG_COROUTINE_ID_KEY, Coroutine::id());
-        try {
-            $response = $handler->handle($request);
-        } catch (Throwable $exception) {
-            throw $exception;
-        } finally {
-            // 日志
-            $endTime = microtime(true);
-            $duration = round(($endTime - $startTime) * 1000);
-            $context = [
-                'url' => $request->url(),
-                'uri' => $request->getUri()->getPath(),
-                'method' => $request->getMethod(),
-                'time' => $duration.'ms',
-            ];
-            $context['query'] = $request->getQueryParams();
-            $context['request'] = $this->getRequestInputArray();
-            $context['headers'] = $this->getHeaders($request);
-
-            isset($response) && $context['response'] = $this->getResponseString($response);
-
-            isset($exception) && !$this->shouldntReport($exception)
-            && $context['exception'] = make(AppFormatter::class)->format($exception, !env_is_production());
-
-            if ($duration >= 300 || isset($context['exception'])) {
-                Log::get('request')->error($requestId, $context);
-            } else {
-                Log::get('request')->debug($requestId, $context);
+        defer(function () {
+            try {
+                $this->log();
+            } catch (Throwable $e) {
+                Log::get('debug.middleware')->error($e->getMessage());
             }
+        });
+
+        return $handler->handle($request);
+    }
+
+    public function log(): void
+    {
+        $endTime = microtime(true);
+        $context = Context::get(AppendRequestProcessor::LOG_LIFECYCLE_KEY) ?? [];
+        $duration = round(($endTime - $context['trigger_time']) * 1000);
+
+        $context['duration'] = $duration.'ms';
+        $context['trigger_time'] = Carbon::createFromTimestamp($context['trigger_time'])->toDateTimeString();
+
+        $response = Context::get(ResponseInterface::class);
+        $context['response'] = $this->getResponseToArray($response);
+        isset($context['exception']) && make(Notifier::class)->exceptionReport($context, $context['exception']);
+        if ($duration >= 500) {
+            Log::get('request')->error(Context::get(AppendRequestProcessor::LOG_REQUEST_ID_KEY), $context);
+        } else {
+            Log::get('request')->debug(Context::get(AppendRequestProcessor::LOG_COROUTINE_ID_KEY), $context);
+        }
+    }
+
+    /**
+     * @param  \Psr\Http\Message\ServerRequestInterface|null  $request
+     *
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @return void
+     */
+    protected function record(?ServerRequestInterface $request): void
+    {
+        $startTime = microtime(true);
+        $context = [
+            'app_name' => config('app_name'),
+            'app_env' => config('app_env'),
+            'trigger_time' => $startTime,
+            'usage_memory' => round(memory_get_peak_usage(true) / 1024 / 1024, 1).'M',
+            'url' => $request?->url(),
+            'uri' => $request?->getUri()->getPath(),
+            'method' => $request?->getMethod(),
+            'duration' => '',
+        ];
+        $context['headers'] = $this->getHeaders($request);
+        $context['query'] = $request?->getQueryParams();
+        $context['request'] = $this->container->get(RequestInterface::class)->post();
+        $context = array_merge($context, $this->getUser());
+
+        Context::set(AppendRequestProcessor::LOG_LIFECYCLE_KEY, $context);
+    }
+
+    protected function getUser(): array
+    {
+        if (self::isLogin()) {
+            $user = self::user();
+
+            return [
+                'user' => [
+                    'id' => $user->id,
+                    'nickname' => $user->nickname,
+                    'role' => $user->role,
+                ],
+            ];
         }
 
-        return $response;
+        return [];
     }
 
-    protected function shouldntReport(Throwable $e): bool
+    protected function getHeaders(?ServerRequestInterface $request): array
     {
-        $dontReport = $this->dontReport;
-
-        $isShouldnt = !is_null(
-            Arr::first($dontReport, static function ($type) use ($e) {
-                return $e instanceof $type;
-            })
-        );
-
-        return env_is_production() && $isShouldnt;
-    }
-
-    protected function getHeaders(ServerRequestInterface $request): array
-    {
-        $headers = $request->getHeaders();
+        if ($request === null) {
+            return [];
+        }
         $onlyHeaderKeys = [
             'content-type',
             'user-agent',
             'sign',
             'token',
             'x-token',
-            'Authorization',
+            'authorization',
             'x-real-ip',
             'x-forwarded-for',
             'cookie',
         ];
         $logHeaders = [];
         foreach ($onlyHeaderKeys as $value) {
-            if (isset($headers[$value])) {
-                $logHeaders[$value] = $headers[$value];
+            if ($request->getHeaderLine($value)) {
+                $logHeaders[$value] = $request->getHeaderLine($value);
             }
         }
 
-        return $logHeaders;
+        return array_filter($logHeaders);
     }
 
-    protected function getResponseString(ResponseInterface $response): string
+    protected function getResponseToArray(?ResponseInterface $response): array
     {
-        $contentType = [
-            'text/html' => 'html',
-            'image/x-icon' => 'icon',
-            'application/x-javascript' => 'js',
-            'text/css' => 'css',
-            'image/svg' => 'svg',
-            'image/jpeg' => 'jpg',
-            'image/webp' => 'png',
-            'image/png' => 'png',
-            'image/gif' => 'gif',
-            'image/bmp' => 'bmp',
-        ];
+        if ($response === null) {
+            return [];
+        }
+
         $type = $response->getHeaderLine('content-type');
-        foreach ($contentType as $k => $v) {
-            if (Str::startsWith($type, $k)) {
-                return $v;
-            }
+        if (str_contains($type, 'application/json')) {
+            $data = Json::decode($response->getBody()->getContents());
+        } else {
+            $data = (array)$response->getBody();
         }
 
-        return (string)$response->getBody();
-    }
+        if (isset($data['debug']) || isset($data['soar'])) {
+            unset($data['debug'], $data['soar']);
+        }
 
-    protected function getRequestString(): string
-    {
-        $data = $this->container->get(Request::class)->all();
-
-        return Json::encode($data);
-    }
-
-    protected function getRequestInputArray(): array
-    {
-        return $this->container->get(Request::class)->post();
+        return $data;
     }
 }

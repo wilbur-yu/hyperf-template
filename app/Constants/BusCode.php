@@ -77,4 +77,9 @@ class BusCode extends AbstractConstants
      * @Message("信息以过期, 请刷新")
      */
     public const CRYPT_DECRYPT_EXPIRE_FAILED = 5102;
+
+    /**
+     * @Message("解密失败")
+     */
+    public const CRYPT_DECRYPT_AUTHORITY_FAILED = 5103;
 }

@@ -62,3 +62,4 @@ class Coroutine
         return Co::id() > 0;
     }
 }
+

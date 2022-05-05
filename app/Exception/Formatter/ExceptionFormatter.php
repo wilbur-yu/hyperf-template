@@ -14,7 +14,7 @@ namespace App\Exception\Formatter;
 use Hyperf\Utils\Arr;
 use Throwable;
 
-class AppFormatter
+trait ExceptionFormatter
 {
     public function format(Throwable $throwable, bool $isHoldArgs = true): array
     {

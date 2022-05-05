@@ -13,20 +13,27 @@ namespace App\Kernel\Http;
 
 use App\Constants\BusCode;
 use App\Constants\HttpCode;
-use App\Kernel\Contract\ResponseInterface as CustomResponseInterface;
 use App\Kernel\Log\AppendRequestProcessor;
 use Hyperf\Context\Context;
+use Hyperf\HttpMessage\Cookie\Cookie;
 use Hyperf\HttpServer\Contract\ResponseInterface;
-use Hyperf\HttpServer\Response as BaseResponse;
 use Hyperf\Paginator\AbstractPaginator;
 use Hyperf\Resource\Json\JsonResource;
 use Hyperf\Resource\Json\ResourceCollection;
 use Hyperf\Utils\Contracts\Arrayable;
 use JetBrains\PhpStorm\ArrayShape;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
-class Response extends BaseResponse implements CustomResponseInterface
+class Response
 {
+    protected ResponseInterface $response;
+
+    public function __construct(protected ContainerInterface $container)
+    {
+        $this->response = $container->get(ResponseInterface::class);
+    }
+
     public function success(
         mixed $data = [],
         string $message = 'success',
@@ -143,31 +150,46 @@ class Response extends BaseResponse implements CustomResponseInterface
             $body = isset($data['data']) ? array_merge($body, $data) : array_merge($body, ['data' => $data]);
         }
 
-        return $this->withAddedHeaders(['content-type' => 'application/json; charset=utf-8'])
-            ->withStatus($code)
-            ->json($body);
+        $this->withAddedHeaders(['content-type' => 'application/json; charset=utf-8']);
+
+        $response = $this->response->withStatus($code)->json($body);
+        Context::set(PsrResponseInterface::class, $response);
+
+        return $response;
     }
 
-    public function withAddedHeaders(array $headers): PsrResponseInterface
+    public function withAddedHeaders(array $headers): Response
     {
         $config = config('response.headers');
         $headers = array_merge($config, $headers);
-
-        if (!Context::has(ResponseInterface::class)) {
-            $response = di(ResponseInterface::class);
-            Context::set(ResponseInterface::class, $response);
+        $response = $this->response;
+        foreach ($headers as $key => $value) {
+            $response = $response->withHeader($key, $value);
         }
+        // Context::set(PsrResponseInterface::class, $response);
 
-        return Context::override(
-            ResponseInterface::class,
-            static function (ResponseInterface $response) use ($headers) {
-                $newResponse = $response;
-                foreach ($headers as $key => $value) {
-                    $newResponse = $newResponse->withHeader($key, $value);
-                }
+        $this->response = $response;
 
-                return $newResponse;
-            }
-        );
+        return $this;
+    }
+
+    public function redirect($url, int $status = 302): PsrResponseInterface
+    {
+        return $this->response
+            ->withAddedHeader('Location', (string)$url)
+            ->withStatus($status);
+    }
+
+    public function cookie(Cookie $cookie): Response
+    {
+        $response = $this->response->withCookie($cookie);
+        Context::set(PsrResponseInterface::class, $response);
+
+        return $this;
+    }
+
+    public function getResponse()
+    {
+        return $this->response;
     }
 }
