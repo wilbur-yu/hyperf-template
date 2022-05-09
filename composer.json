@@ -25,7 +25,7 @@
         "ext-redis": "*",
         "ext-swoole": "*",
         "ext-zend-opcache": "*",
-        "friendsofhyperf/http-client": "^0.1.9",
+        "friendsofhyperf/http-client": "^0.5.0",
         "guanguans/notify": "^1.18",
         "hyperf-ext/auth": "^2.2",
         "hyperf-ext/encryption": "^2.2",
@@ -34,7 +34,7 @@
         "hyperf/command": "~2.2.0",
         "hyperf/config": "~2.2.0",
         "hyperf/constants": "~2.2.0",
-        "hyperf/context": "^2.2",
+        "hyperf/context": "~2.2.0",
         "hyperf/db-connection": "~2.2.0",
         "hyperf/framework": "~2.2.0",
         "hyperf/guzzle": "~2.2.0",
@@ -43,13 +43,13 @@
         "hyperf/memory": "~2.2.0",
         "hyperf/process": "~2.2.0",
         "hyperf/redis": "~2.2.0",
-        "hyperf/resource": "^2.2",
-        "hyperf/task": "^2.2",
+        "hyperf/resource": "~2.2.0",
+        "hyperf/task": "~2.2.0",
         "hyperf/utils": "~2.2.0",
-        "hyperf/validation": "^2.2",
+        "hyperf/validation": "~2.2",
         "jetbrains/phpstorm-attributes": "^1.0",
-        "wilbur-yu/hyperf-cache-ext": "^0.1.0",
-        "wilbur-yu/hyperf-opcache": "^0.0.4"
+        "wilbur-yu/hyperf-cache-ext": "^1.0",
+        "wilbur-yu/hyperf-opcache": "^0.0.5"
     },
     "require-dev": {
         "composer/composer": "^2.1",
@@ -91,8 +91,7 @@
     "extra": {
     },
     "scripts": {
-        "pre-install-cmd": "Installer\\Script::install",
-        "pre-update-cmd": "Installer\\Script::install",
+
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
         ],

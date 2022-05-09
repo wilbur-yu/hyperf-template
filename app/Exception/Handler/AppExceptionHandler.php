@@ -80,9 +80,11 @@ class AppExceptionHandler extends ExceptionHandler
     protected function alarm($throwable): void
     {
         if ($this->shouldReport($throwable)) {
-            $context = Context::get(AppendRequestProcessor::LOG_LIFECYCLE_KEY);
-            $context['exception'] = $throwable;
-            Context::set(AppendRequestProcessor::LOG_LIFECYCLE_KEY, $context);
+            Context::override(AppendRequestProcessor::LOG_LIFECYCLE_KEY, static function ($context) use ($throwable) {
+                $context['exception'] = $throwable;
+
+                return $context;
+            });
             // make(Notifier::class)->exceptionReport($context, $throwable);
         }
     }

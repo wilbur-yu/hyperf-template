@@ -167,7 +167,6 @@ class AuthCode
         };
     }
 
-
     protected function pack(string|array|int $data): string|int
     {
         return is_numeric($data) && !in_array($data, [INF, -INF], true)

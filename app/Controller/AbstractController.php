@@ -14,17 +14,14 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Kernel\Contract\ResponseInterface;
-use App\Support\Trait\UserTrait;
+use App\Kernel\Http\Response;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Contract\RequestInterface;
 
 abstract class AbstractController
 {
-    use UserTrait;
-
     #[Inject]
     protected RequestInterface $request;
     #[Inject]
-    protected ResponseInterface $response;
+    protected Response $response;
 }

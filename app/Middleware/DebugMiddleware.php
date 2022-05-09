@@ -17,8 +17,8 @@ use App\Report\Notifier;
 use App\Support\Trait\HasUser;
 use Carbon\Carbon;
 use Hyperf\Context\Context;
-use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\Utils\Codec\Json;
+use Hyperf\Utils\Coroutine;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -46,11 +46,14 @@ class DebugMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $this->record($request);
+        Context::getOrSet(AppendRequestProcessor::LOG_REQUEST_ID_KEY, uniqid('', true));
+        Context::getOrSet(AppendRequestProcessor::LOG_COROUTINE_ID_KEY, Coroutine::id());
+
+        $this->collecter($request);
 
         defer(function () {
             try {
-                $this->log();
+                $this->record();
             } catch (Throwable $e) {
                 Log::get('debug.middleware')->error($e->getMessage());
             }
@@ -59,7 +62,7 @@ class DebugMiddleware implements MiddlewareInterface
         return $handler->handle($request);
     }
 
-    public function log(): void
+    public function record(): void
     {
         $endTime = microtime(true);
         $context = Context::get(AppendRequestProcessor::LOG_LIFECYCLE_KEY) ?? [];
@@ -85,7 +88,7 @@ class DebugMiddleware implements MiddlewareInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      * @return void
      */
-    protected function record(?ServerRequestInterface $request): void
+    protected function collecter(?ServerRequestInterface $request): void
     {
         $startTime = microtime(true);
         $context = [
@@ -100,7 +103,7 @@ class DebugMiddleware implements MiddlewareInterface
         ];
         $context['headers'] = $this->getHeaders($request);
         $context['query'] = $request?->getQueryParams();
-        $context['request'] = $this->container->get(RequestInterface::class)->post();
+        $context['payload'] = $request?->getParsedBody();
         $context = array_merge($context, $this->getUser());
 
         Context::set(AppendRequestProcessor::LOG_LIFECYCLE_KEY, $context);
