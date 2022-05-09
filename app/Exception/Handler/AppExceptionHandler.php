@@ -27,7 +27,7 @@ use Hyperf\HttpMessage\Exception\NotFoundHttpException;
 use Hyperf\Utils\Arr;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Throwable;
-use WilburYu\HyperfCacheExt\Exception\CounterRateLimitException;
+use WilburYu\HyperfCacheExt\Exception\CounterRateLimiterException;
 
 class AppExceptionHandler extends ExceptionHandler
 {
@@ -43,7 +43,7 @@ class AppExceptionHandler extends ExceptionHandler
         NotFoundException::class,
         // BusinessException::class,
         AuthorizationException::class,
-        CounterRateLimitException::class,
+        CounterRateLimiterException::class,
     ];
 
     protected array $dontReportCode = [
@@ -61,7 +61,7 @@ class AppExceptionHandler extends ExceptionHandler
             $code = $throwable->getStatusCode();
         }
 
-        if ($throwable instanceof CounterRateLimitException) {
+        if ($throwable instanceof CounterRateLimiterException) {
             $headers = $throwable->getHeaders();
             $code = $throwable->getCode();
             $message = BusCode::getMessage($code);
