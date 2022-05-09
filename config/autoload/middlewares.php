@@ -14,18 +14,14 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 
-use App\Middleware\CorsMiddleware;
 use App\Middleware\DebugMiddleware;
-use App\Middleware\WithRequestLocaleMiddleware;
-use App\Middleware\WithRequestSchemeMiddleware;
+use App\Middleware\WithRequestInitMiddleware;
 use Hyperf\Validation\Middleware\ValidationMiddleware;
 
 return [
     'http' => [
-        WithRequestSchemeMiddleware::class,
-        WithRequestLocaleMiddleware::class,
-        CorsMiddleware::class,
-        ValidationMiddleware::class,
         DebugMiddleware::class,
+        ValidationMiddleware::class,
+        WithRequestInitMiddleware::class,
     ],
 ];
