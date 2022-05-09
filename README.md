@@ -11,4 +11,12 @@ composer start-dev
 ```
 访问: http://localhost:9501/
 
-# 感谢
+# 工具清单
+1. 参数签名和验证
+2. 带有效期的加解密(authcode)
+3. 请求与响应的数据完整日志记录
+4. Redis Bitmap 工具类封装
+5. 计数器/漏斗/时间窗口限流注解
+6. Resource值可动态隐藏与显示
+7. 异常告警(基于[https://github.com/guanguans/notify](https://github.com/guanguans/notify))
+8. 
