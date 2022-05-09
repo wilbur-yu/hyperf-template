@@ -74,11 +74,14 @@ class DebugMiddleware implements MiddlewareInterface
         $response = Context::get(ResponseInterface::class);
         $context['response'] = $this->getResponseToArray($response);
         isset($context['exception']) && make(Notifier::class)->exceptionReport($context, $context['exception']);
-        if ($duration >= 500) {
-            Log::get('request')->error(Context::get(AppendRequestProcessor::LOG_REQUEST_ID_KEY), $context);
+        if (isset($context['exception'])) {
+            $logLevel = 'error';
+        } elseif ($duration >= 500) {
+            $logLevel = 'warning';
         } else {
-            Log::get('request')->debug(Context::get(AppendRequestProcessor::LOG_COROUTINE_ID_KEY), $context);
+            $logLevel = 'info';
         }
+        Log::get('request')->{$logLevel}(Context::get(AppendRequestProcessor::LOG_REQUEST_ID_KEY), $context);
     }
 
     /**
