@@ -25,7 +25,7 @@
         "ext-redis": "*",
         "ext-swoole": "*",
         "ext-zend-opcache": "*",
-        "friendsofhyperf/http-client": "^0.5.0",
+        "friendsofhyperf/http-client": "^2.0",
         "guanguans/notify": "^1.18",
         "hyperf-ext/auth": "^2.2",
         "hyperf-ext/encryption": "^2.2",
