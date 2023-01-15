@@ -6,7 +6,7 @@ declare(strict_types=1);
  * This file is part of project burton.
  *
  * @author   wenbo@wenber.club
- * @link     https://github.com/wilbur-yu/hyperf-template
+ * @link     https://github.com/wilbur-yu
  */
 
 namespace App\Support;
@@ -18,6 +18,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use RuntimeException;
+use Throwable;
 
 /**
  * Discuz! 经典加密解密函数
@@ -59,10 +60,36 @@ class AuthCode
         $this->subSecretKeyB = md5(substr($secretKey, 0, 16));
     }
 
+    public function encrypt(string|array|int $data, int $expiry = 0): string
+    {
+        // 动态密匙用于变化生成的密文
+        $dynamicKey = $this->dynamicKeyLength ? substr(md5(microtime()), -$this->dynamicKeyLength) : '';
+        $cryptKey = $this->init($dynamicKey);
+        // 明文，前10位用来保存时间戳，解密时验证数据有效性，10到26位用来保存$this->subSecretKeyB，
+        // 解密时会通过这个密匙验证数据完整性
+        $dataPack = $this->pack($data);
+        $dataPack = sprintf('%010d', $expiry ? $expiry + time() : 0)
+                    .substr(md5($dataPack.$this->subSecretKeyB), 0, 16)
+                    .$dataPack;
+        $result = $this->calculation($dataPack, $cryptKey);
+
+        // 把动态密匙保存在密文里，这也是为什么同样的明文，生产不同密文后能解密的原因
+        // 因为加密后的密文可能是一些特殊字符，复制过程可能会丢失，所以用base64编码
+        $replace = $this->replace(__FUNCTION__);
+
+        return $replace($dynamicKey.str_replace('=', '', base64_encode($result)));
+    }
+
     protected function init(string $dynamicKey): string
     {
         // 参与运算的密钥
         return $this->subSecretKeyA.md5($this->subSecretKeyA.$dynamicKey);
+    }
+
+    protected function pack(string|array|int $data): string|int
+    {
+        return is_numeric($data) && !in_array($data, [INF, -INF], true)
+               && !is_nan((float)$data) ? $data : serialize($data);
     }
 
     protected function calculation(string $data, $cryptKey): string
@@ -97,58 +124,6 @@ class AuthCode
         return $result;
     }
 
-    public function encrypt(string|array|int $data, int $expiry = 0): string
-    {
-        // 动态密匙用于变化生成的密文
-        $dynamicKey = $this->dynamicKeyLength ? substr(md5(microtime()), -$this->dynamicKeyLength) : '';
-        $cryptKey = $this->init($dynamicKey);
-        // 明文，前10位用来保存时间戳，解密时验证数据有效性，10到26位用来保存$this->subSecretKeyB，
-        // 解密时会通过这个密匙验证数据完整性
-        $dataPack = $this->pack($data);
-        $dataPack = sprintf('%010d', $expiry ? $expiry + time() : 0)
-                    .substr(md5($dataPack.$this->subSecretKeyB), 0, 16)
-                    .$dataPack;
-        $result = $this->calculation($dataPack, $cryptKey);
-
-        // 把动态密匙保存在密文里，这也是为什么同样的明文，生产不同密文后能解密的原因
-        // 因为加密后的密文可能是一些特殊字符，复制过程可能会丢失，所以用base64编码
-        $replace = $this->replace(__FUNCTION__);
-
-        return $replace($dynamicKey.str_replace('=', '', base64_encode($result)));
-    }
-
-    public function decrypt(string $encrypt, ?string $message = null): int|array|string
-    {
-        $replace = $this->replace(__FUNCTION__);
-        $encrypt = $replace($encrypt);
-        // 动态密匙用于变化生成的密文
-        $dynamicKey = $this->dynamicKeyLength ? substr($encrypt, 0, $this->dynamicKeyLength) : '';
-        $cryptKey = $this->init($dynamicKey);
-        // 从第 $this->dynamicKeyLength 位开始，因为密文前 $this->dynamicKeyLength 位保存动态密匙，以保证解密正确
-        $encrypt = base64_decode(substr($encrypt, $this->dynamicKeyLength));
-        $result = $this->calculation($encrypt, $cryptKey);
-        // substr($result, 0, 10) == 0 验证数据有效性
-        // substr($result, 0, 10) - time() > 0 验证数据有效性
-        // substr($result, 10, 16) == substr(md5(substr($result, 26).$this->subSecretKeyB), 0, 16) 验证数据完整性
-        // 验证数据有效性，请看未加密明文的格式
-        // $resultExpiryIsValid = substr($result, 0, 10) == 0 || (int)substr($result, 0, 10) - time() > 0;
-        // $resultIsValid = substr($result, 10, 16) == substr(md5(substr($result, 26).$this->subSecretKeyB), 0, 16);
-        $resultExpiryIsValid = str_starts_with($result, '0') || (((int)substr($result, 0, 10) - time()) > 0);
-        $resultIsValid = str_starts_with(
-            md5(substr($result, 26).$this->subSecretKeyB),
-            substr($result, 10, 16)
-        );
-        if (!$resultExpiryIsValid) {
-            $code = BusCode::CRYPT_DECRYPT_EXPIRE_FAILED;
-        } elseif (!$resultIsValid) {
-            $code = BusCode::CRYPT_DECRYPT_AUTHORITY_FAILED;
-        } else {
-            return $this->unpack(substr($result, 26));
-        }
-
-        throw new DecryptException($code, $message);
-    }
-
     protected function replace(string $operation): callable
     {
         return match ($operation) {
@@ -158,19 +133,62 @@ class AuthCode
                 //     $data .= substr('====', $mod4);
                 // }
 
-                return str_replace(['-', '_'], ['+', '/'], $decrypt);
+                return str_replace(['-', '_', '.'], ['+', '/', '='], $decrypt);
             },
             'encrypt' => static function ($encrypt) {
-                return str_replace(['+', '/', '='], ['-', '_', ''], $encrypt);
+                return str_replace(['+', '/', '='], ['-', '_', '.'], $encrypt);
             },
             default => throw new RuntimeException('调用方法错误'),
         };
     }
 
-    protected function pack(string|array|int $data): string|int
+    public function decrypt(string $encrypt, ?int $errorCode = null): int|array|string
     {
-        return is_numeric($data) && !in_array($data, [INF, -INF], true)
-               && !is_nan((float)$data) ? $data : serialize($data);
+        try {
+            $replace = $this->replace(__FUNCTION__);
+            $encrypt = $replace($encrypt);
+            // 动态密匙用于变化生成的密文
+            $dynamicKey = $this->dynamicKeyLength ? substr($encrypt, 0, $this->dynamicKeyLength) : '';
+            $cryptKey = $this->init($dynamicKey);
+            // 从第 $this->dynamicKeyLength 位开始，因为密文前 $this->dynamicKeyLength 位保存动态密匙，以保证解密正确
+            $encrypt = base64_decode(substr($encrypt, $this->dynamicKeyLength));
+            $result = $this->calculation($encrypt, $cryptKey);
+            // substr($result, 0, 10) == 0 验证数据有效性
+            // substr($result, 0, 10) - time() > 0 验证数据有效性
+            // substr($result, 10, 16) == substr(md5(substr($result, 26).$this->subSecretKeyB), 0, 16) 验证数据完整性
+            // 验证数据有效性，请看未加密明文的格式
+            // $resultExpiryIsValid = substr($result, 0, 10) == 0 || (int)substr($result, 0, 10) - time() > 0;
+            // $resultIsValid = substr($result, 10, 16) == substr(md5(substr($result, 26).$this->subSecretKeyB), 0, 16);
+            $resultExpiryIsValid = str_starts_with($result, '0') || (((int)substr($result, 0, 10) - time()) > 0);
+            $resultIsValid = str_starts_with(
+                md5(substr($result, 26).$this->subSecretKeyB),
+                substr($result, 10, 16)
+            );
+            if (!$resultExpiryIsValid) {
+                throw new DecryptException(
+                    $errorCode ?? BusCode::CRYPT_DECRYPT_EXPIRE_FAILED,
+                    data: ['encrypt' => $encrypt]
+                );
+            }
+
+            if (!$resultIsValid) {
+                throw new DecryptException(
+                    $errorCode ?? BusCode::CRYPT_DECRYPT_AUTHORITY_FAILED,
+                    data: ['encrypt' => $encrypt]
+                );
+            }
+
+            return $this->unpack(substr($result, 26));
+        } catch (Throwable $e) {
+            if ($e instanceof DecryptException) {
+                throw $e;
+            }
+            throw new DecryptException(
+                $errorCode ?? BusCode::CRYPT_DECRYPT_FAILED,
+                previous: $e,
+                data: ['encrypt' => $encrypt]
+            );
+        }
     }
 
     protected function unpack(string|int $data): int|string|array

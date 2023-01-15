@@ -6,14 +6,16 @@ declare(strict_types=1);
  * This file is part of project burton.
  *
  * @author   wenbo@wenber.club
- * @link     https://github.com/wilbur-yu/hyperf-template
+ * @link     https://github.com/wilbur-yu
  */
 
-use App\Kernel\Contract\ResponseInterface;
-use App\Kernel\Log\Log;
-use App\Kernel\Http\RouteCollector;
-use App\Support\AuthCode;
 use Carbon\Carbon;
+use App\Kernel\Contract\ResponseInterface;
+use App\Kernel\Http\RouteCollector;
+use App\Kernel\Log\Log;
+use App\Report\Notifier;
+use App\Support\AuthCode;
+use App\Support\Environment;
 use Hyperf\AsyncQueue\Driver\DriverFactory;
 use Hyperf\AsyncQueue\Driver\DriverInterface;
 use Hyperf\Contract\SessionInterface;
@@ -26,10 +28,6 @@ use Hyperf\Server\ServerFactory;
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Str;
 use Hyperf\Validation\Contract\ValidatorFactoryInterface;
-use HyperfExt\Auth\Contracts\AuthManagerInterface;
-use HyperfExt\Auth\Contracts\GuardInterface;
-use HyperfExt\Auth\Contracts\StatefulGuardInterface;
-use HyperfExt\Auth\Contracts\StatelessGuardInterface;
 use JetBrains\PhpStorm\Pure;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -37,38 +35,76 @@ use Psr\Log\LoggerInterface;
 use Swoole\Server;
 use Swoole\WebSocket\Frame;
 
-if (!function_exists('env_is_local')) {
-    function env_is_local(): bool
+if (!function_exists('environment')) {
+    function environment(): Environment
     {
-        return config('app_env') === 'dev';
+        return di(Environment::class);
     }
 }
 
-if (!function_exists('env_is_production')) {
-    function env_is_production(): bool
+if (!function_exists('notifier')) {
+    function notifier(): Notifier
     {
-        return config('app_env') === 'prod';
+        return di(Notifier::class);
     }
 }
 
-if (!function_exists('env_is_test')) {
-    function env_is_test(): bool
+if (!function_exists('utf8sub')) {
+    /**
+     * UTF8字符串截取
+     *
+     * @param       $str
+     * @param       $len
+     * @param  int  $offset
+     *
+     * @return string
+     */
+    function utf8sub($str, $len, int $offset = 0): string
     {
-        return config('app_env') === 'test';
+        if ($len < 0) {
+            return '';
+        }
+        $res = '';
+        // $offset = 0;
+        $chars = 0;
+        $count = 0;
+        $length = strlen($str);//待截取字符串的字节数
+        while ($chars < $len && $offset < $length) {
+            $high = decbin(ord(substr($str, $offset, 1)));//先截取客串的一个字节，substr按字节进行截取
+            //重要突破，已经能够判断高位字节
+            if (strlen($high) < 8) {//英文字符ascii编码长度为7，通过长度小于8来判断
+                $count = 1;
+            } elseif (str_starts_with($high, '110')) {
+                $count = 2;    //取两个字节的长度
+            } elseif (str_starts_with($high, '1110')) {
+                $count = 3;    //取三个字节的长度
+            } elseif (str_starts_with($high, '11110')) {
+                $count = 4;
+            } elseif (str_starts_with($high, '111110')) {
+                $count = 5;
+            } elseif (str_starts_with($high, '1111110')) {
+                $count = 6;
+            }
+            $res .= substr($str, $offset, $count);
+            ++$chars;
+            $offset += $count;
+        }
+
+        return $res;
     }
 }
 
 if (!function_exists('encrypt')) {
     function encrypt($data, int $expiry = 0): string
     {
-        return di(AuthCode::class)->encrypt($data, $expiry);
+        return di(class: AuthCode::class)->encrypt(data: $data, expiry: $expiry);
     }
 }
 
 if (!function_exists('decrypt')) {
-    function decrypt(string $encrypt, ?string $message = null): int|array|string
+    function decrypt(string $encrypt, ?int $errorCode = null): int|array|string
     {
-        return di(AuthCode::class)->decrypt($encrypt, $message);
+        return di(class: AuthCode::class)->decrypt(encrypt: $encrypt, errorCode: $errorCode);
     }
 }
 
@@ -81,9 +117,10 @@ if (!function_exists('locale')) {
         return di(TranslatorInterface::class)->getLocale();
     }
 }
+
 if (!function_exists('array_reduces')) {
     /**
-     * @param null $carry
+     * @param  null  $carry
      *
      * @return mixed|null
      */
@@ -118,16 +155,15 @@ function transform(mixed $value, callable $callback, mixed $default = null): mix
     return $default;
 }
 
-if (!function_exists('auth')) {
-    /**
-     * hyperf-ext/auth: Auth认证辅助方法.
-     */
-    function auth(?string $guard = null): StatefulGuardInterface|GuardInterface|StatelessGuardInterface
-    {
-        return make(AuthManagerInterface::class)->guard($guard);
-    }
-}
-
+// if (!function_exists('auth')) {
+//     /**
+//      * hyperf-ext/auth: Auth认证辅助方法.
+//      */
+//     function auth(?string $guard = null): StatefulGuardInterface|GuardInterface|StatelessGuardInterface
+//     {
+//         return make(AuthManagerInterface::class)->guard($guard);
+//     }
+// }
 if (!function_exists('route')) {
     function route(string $name, array $variables = [], string $server = 'http'): string
     {
@@ -212,7 +248,7 @@ if (!function_exists('order_no')) {
     /**
      * 支持中小型支付系统，单机房生成订单号QPS<=1w，保证订单号绝对唯一
      */
-    function order_no(string $prefix = ''): string
+    function order_no(string $prefix = 'BA'): string
     {
         return $prefix.date('YmdHis').
                substr(
@@ -222,7 +258,7 @@ if (!function_exists('order_no')) {
                            'ord',
                            str_split(
                                substr(
-                                   uniqid('', true),
+                                   uniqid(Str::random(), true),
                                    7,
                                    13
                                )
@@ -492,7 +528,7 @@ if (!function_exists('guid')) {
 
         $hyphen = chr(45); // "-"
 
-        return substr($charId, 0, 8).$hyphen
+        return substr($charId, 0, 4).$hyphen
                .substr($charId, 8, 4).$hyphen
                .substr($charId, 12, 4).$hyphen
                .substr($charId, 16, 4).$hyphen

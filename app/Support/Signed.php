@@ -6,13 +6,13 @@ declare(strict_types=1);
  * This file is part of project burton.
  *
  * @author   wenbo@wenber.club
- * @link     https://github.com/wilbur-yu/hyperf-template
+ * @link     https://github.com/wilbur-yu
  */
 
 namespace App\Support;
 
-use App\Exception\SignatureException;
 use Carbon\Carbon;
+use App\Exception\SignatureException;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Utils\Codec\Json;
 use Hyperf\Utils\InteractsWithTime;
@@ -135,13 +135,15 @@ class Signed
             'Signature parameter is missing, please check'
         );
 
-        $ignore[] = self::SIGNATURE_FIELD;
+        $ignore = array_merge($ignore, [self::SIGNATURE_FIELD, self::EXPIRES_FIELD]);
 
         ksort($parameters);
 
         $original = array_diff_key($parameters, array_flip($ignore));
 
         $signature = hash_hmac('sha256', Json::encode($original), $this->config->get('app_key'));
+
+        logger('support')->info('signed', ['original' => $original, 'signature' => $signature]);
 
         return hash_equals($signature, (string)$parameters[self::SIGNATURE_FIELD]);
     }
@@ -156,13 +158,13 @@ class Signed
      */
     public function hasNotExpired($expires, bool $isAllowTimeout = true): bool
     {
-        $now = Carbon::now();
         if (empty($expires)) {
-            return true;
+            return false;
         }
+        $now = Carbon::now();
         if ($isAllowTimeout
-            && $now->diffInRealSeconds(Carbon::createFromTimestamp($expires))
-               <= self::EXPIRES_TIMEOUT_SECOND) {
+            && ($now->diffInRealSeconds(Carbon::createFromTimestamp($expires))
+                <= self::EXPIRES_TIMEOUT_SECOND)) {
             return true;
         }
 

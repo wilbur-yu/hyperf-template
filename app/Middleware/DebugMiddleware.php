@@ -6,16 +6,16 @@ declare(strict_types=1);
  * This file is part of project burton.
  *
  * @author   wenbo@wenber.club
- * @link     https://github.com/wilbur-yu/hyperf-template
+ * @link     https://github.com/wilbur-yu
  */
 
 namespace App\Middleware;
 
+use Carbon\Carbon;
 use App\Kernel\Log\AppendRequestProcessor;
 use App\Kernel\Log\Log;
 use App\Report\Notifier;
 use App\Support\Trait\HasUser;
-use Carbon\Carbon;
 use Hyperf\Context\Context;
 use Hyperf\Utils\Codec\Json;
 use Hyperf\Utils\Coroutine;
@@ -26,7 +26,9 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Throwable;
 
+use function defer;
 use function microtime;
+use function str_contains;
 
 class DebugMiddleware implements MiddlewareInterface
 {
@@ -46,18 +48,22 @@ class DebugMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        if ($request->getMethod() === 'HEAD' && $request->getUri()->getPath() === '/api') {
+            return $handler->handle($request);
+        }
         Context::getOrSet(AppendRequestProcessor::LOG_REQUEST_ID_KEY, uniqid('', true));
         Context::getOrSet(AppendRequestProcessor::LOG_COROUTINE_ID_KEY, Coroutine::id());
-
-        $this->collecter($request);
-
-        defer(function () {
-            try {
-                $this->record();
-            } catch (Throwable $e) {
-                Log::get('debug.middleware')->error($e->getMessage());
-            }
-        });
+        try {
+            $this->collecter($request);
+        } finally {
+            defer(function () {
+                try {
+                    $this->record();
+                } catch (Throwable $e) {
+                    Log::get('debug.middleware')->error($e->getMessage().' '.format_throwable($e));
+                }
+            });
+        }
 
         return $handler->handle($request);
     }
@@ -66,20 +72,24 @@ class DebugMiddleware implements MiddlewareInterface
     {
         $endTime = microtime(true);
         $context = Context::get(AppendRequestProcessor::LOG_LIFECYCLE_KEY) ?? [];
-        $duration = round(($endTime - $context['trigger_time']) * 1000);
-
-        $context['duration'] = $duration.'ms';
-        $context['trigger_time'] = Carbon::createFromTimestamp($context['trigger_time'])->toDateTimeString();
+        $duration = 0;
+        if (isset($context['trigger_time'])) {
+            $duration = round(($endTime - $context['trigger_time']) * 1000);
+            $context['duration'] = $duration.'ms';
+            $context['trigger_time'] = Carbon::createFromTimestamp($context['trigger_time'])->toDateTimeString();
+        }
 
         $response = Context::get(ResponseInterface::class);
         $context['response'] = $this->getResponseToArray($response);
-        isset($context['exception']) && make(Notifier::class)->exceptionReport($context, $context['exception']);
+        isset($context['exception']) && make(Notifier::class)->reportForException($context, $context['exception']);
         if (isset($context['exception'])) {
             $logLevel = 'error';
+        } elseif (environment()->is('test', 'local')) {
+            $logLevel = 'info';
         } elseif ($duration >= 500) {
             $logLevel = 'warning';
         } else {
-            $logLevel = 'info';
+            $logLevel = 'debug';
         }
         Log::get('request')->{$logLevel}(Context::get(AppendRequestProcessor::LOG_REQUEST_ID_KEY), $context);
     }
@@ -102,13 +112,13 @@ class DebugMiddleware implements MiddlewareInterface
             'url' => $request?->url(),
             'uri' => $request?->getUri()->getPath(),
             'method' => $request?->getMethod(),
+            'client_ip' => get_client_ip(),
             'duration' => '',
+            'headers' => $this->getHeaders($request),
+            'query' => $request?->getQueryParams(),
+            'payload' => $request?->getParsedBody(),
+            'user' => $this->getUser(),
         ];
-        $context['headers'] = $this->getHeaders($request);
-        $context['query'] = $request?->getQueryParams();
-        $context['payload'] = $request?->getParsedBody();
-        $context = array_merge($context, $this->getUser());
-
         Context::set(AppendRequestProcessor::LOG_LIFECYCLE_KEY, $context);
     }
 
@@ -122,6 +132,8 @@ class DebugMiddleware implements MiddlewareInterface
                     'id' => $user->id,
                     'nickname' => $user->nickname,
                     'role' => $user->role,
+                    'ski_resort_id' => $user->ski_resort_id,
+                    'tel' => $user->tel,
                 ],
             ];
         }

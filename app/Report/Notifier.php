@@ -6,7 +6,7 @@ declare(strict_types=1);
  * This file is part of project burton.
  *
  * @author   wenbo@wenber.club
- * @link     https://github.com/wilbur-yu/hyperf-template
+ * @link     https://github.com/wilbur-yu
  */
 
 namespace App\Report;
@@ -33,7 +33,7 @@ class Notifier
 ```
 md;
 
-    protected array $_collector = [
+    public const COLLECTOR = [
         'trigger_time' => true,
         'usage_memory' => true,
 
@@ -63,59 +63,23 @@ md;
         'exception_stack_trace' => true,
     ];
 
-    public function exceptionReport(array $data, Throwable $throwable, string $title = '业务接口异常报警'): void
+    public function reportForException(array $data, Throwable $throwable, ?string $title = null): void
     {
-        unset($data['exception']);
-        $content = self::formatInformation(array_merge($data, $this->simplifyException($throwable)));
-        $this->send('xiZhi', [$title, $content]);
-    }
-
-    public static function xiZhi(string $title, string $content): void
-    {
-        logger('notifier.xizhi')->info('发送异常告警通知');
-        $config = config('notify.xiZhi');
-        Factory::xiZhi()
-            ->setType($config['type'])
-            ->setToken($config['token'])
-            ->setMessage(
-                new XiZhiMessage(
-                    $title,
-                    transform($content, static function ($content) {
-                        return sprintf(self::MARKDOWN_TEMPLATE, $content);
-                    })
-                )
-            )->send();
-    }
-
-    public function report(string $client = 'dingTalk', ...$data): void
-    {
-        logger('notifier.report')->info('新订单通知');
-        $this->send($client, ...$data);
-    }
-
-    protected function send(string $client, ...$data): void
-    {
-        try {
-            di(TaskExecutor::class)->execute(new Task([self::class, $client], ...$data));
-        } catch (Throwable $e) {
-            logger('notifier.send')->error($e->getMessage());
+        if (environment()->isLocal()) {
+            return;
         }
-    }
-
-    public static function dingTalk(string $title, string $text, bool $isAtAll = true): void
-    {
-        logger('notifier.dingtalk')->info('发送新订单通知');
-        $config = config('notify.dingTalk');
-        Factory::dingTalk()
-            ->setToken($config['token'])
-            ->setSecret($config['secret'])
-            ->setMessage(
-                new MarkdownMessage([
-                    'title' => $title,
-                    'text' => $text,
-                    'isAtAll' => $isAtAll,
-                ])
-            )->send();
+        if ($title === null) {
+            if (method_exists($throwable, 'getTitle')) {
+                $title = $throwable->getTitle();
+            } else {
+                $title = '业务接口异常报警';
+            }
+        }
+        $name = '('.config('app_env').') '.config('app_name');
+        unset($data['exception']);
+        $content = self::formatInformation(array_merge($data, $this->formatException($throwable)));
+        $this->send('xiZhi', ["[$name] ".$title, $content]);
+        $this->send('dingTalk', ["[$name] ".$title, $content]);
     }
 
     protected static function formatInformation(array $information): string
@@ -126,13 +90,13 @@ md;
         $message = array_reduces($information, static function ($carry, $val, $name) {
             is_scalar($val) or $val = var_export($val, true);
 
-            return $carry.sprintf("%s: %s\n", str_replace('_', ' ', Str::title($name)), $val);
+            return $carry.sprintf("%s: %s\n", str_replace('_', ' ', Str::title((string)$name)), $val);
         }, '');
 
         return trim($message);
     }
 
-    protected function simplifyException(?Throwable $exception = null): array
+    public function formatException(?Throwable $exception = null): array
     {
         if ($exception === null) {
             return [];
@@ -147,8 +111,8 @@ md;
             'Exception Carry Data' => method_exists($exception, 'getCustomData') ?
                 $exception->getCustomData() : null,
             'Exception Line Preview' => ExceptionContext::getContextAsString($exception),
-            'Exception Stack Trace' => with($exception->getTrace(), function ($trace) {
-                if (!$this->_collector['exception_stack_trace']) {
+            'Exception Stack Trace' => with($exception->getTrace(), static function ($trace) {
+                if (!self::COLLECTOR['exception_stack_trace']) {
                     return null;
                 }
 
@@ -156,8 +120,8 @@ md;
                     ->filter(function ($trace) {
                         return isset($trace['file']) and isset($trace['line']);
                     })
-                    ->when(is_callable($this->_collector['exception_stack_trace']), function (Collection $traces) {
-                        return $traces->filter($this->_collector['exception_stack_trace']);
+                    ->when(is_callable(self::COLLECTOR['exception_stack_trace']), function (Collection $traces) {
+                        return $traces->filter(self::COLLECTOR['exception_stack_trace']);
                     })
                     ->map(function ($trace) {
                         return $trace['file']."({$trace['line']})";
@@ -166,19 +130,22 @@ md;
                     ->toArray();
             }),
         ];
-        if ($exception->getPrevious()) {
-            $prev = [
-                'Previous Exception Class' => get_class($exception->getPrevious()),
-                'Previous Exception Message' => $exception->getPrevious()->getMessage(),
-                'Previous Exception Code' => $exception->getPrevious()->getCode(),
-                'Previous Exception File' => $exception->getPrevious()->getFile(),
-                'Previous Exception Line' => $exception->getPrevious()->getLine(),
-                'Previous Exception Carry Data' => is_object($exception->getPrevious())
-                                                   && method_exists($exception->getPrevious(), 'getCustomData') ?
-                    $exception->getPrevious()->getCustomData() : null,
-                'Previous Exception Line Preview' => ExceptionContext::getContextAsString($exception),
-                'Previous Exception Stack Trace' => with($exception->getTrace(), function ($trace) {
-                    if (!$this->_collector['exception_stack_trace']) {
+        $previous = $exception->getPrevious();
+        $loop = 1;
+        while ($previous !== null) {
+            $exceptionClass = get_class($previous);
+            $prev["[Previous-$loop] $exceptionClass"] = [
+                'Previous Exception Class' => $exceptionClass,
+                'Previous Exception Message' => $previous->getMessage(),
+                'Previous Exception Code' => $previous->getCode(),
+                'Previous Exception File' => $previous->getFile(),
+                'Previous Exception Line' => $previous->getLine(),
+                'Previous Exception Carry Data' => is_object($previous)
+                && method_exists($previous, 'getCustomData') ?
+                    $previous->getCustomData() : null,
+                'Previous Exception Line Preview' => ExceptionContext::getContextAsString($previous),
+                'Previous Exception Stack Trace' => with($previous->getTrace(), static function ($trace) {
+                    if (!self::COLLECTOR['exception_stack_trace']) {
                         return null;
                     }
 
@@ -186,8 +153,8 @@ md;
                         ->filter(function ($trace) {
                             return isset($trace['file']) and isset($trace['line']);
                         })
-                        ->when(is_callable($this->_collector['exception_stack_trace']), function (Collection $traces) {
-                            return $traces->filter($this->_collector['exception_stack_trace']);
+                        ->when(is_callable(self::COLLECTOR['exception_stack_trace']), function (Collection $traces) {
+                            return $traces->filter(self::COLLECTOR['exception_stack_trace']);
                         })
                         ->map(function ($trace) {
                             return $trace['file']."({$trace['line']})";
@@ -196,8 +163,75 @@ md;
                         ->toArray();
                 }),
             ];
+            $loop++;
+            $previous = $previous->getPrevious();
         }
 
         return array_merge($e, $prev ?? []);
+    }
+
+    // public function report(string $client = 'dingTalk', ...$data): void
+    // {
+    //     logger('notifier.report')->info('新订单通知');
+    //     $this->send($client, ...$data);
+    // }
+
+    protected function send(string $client, ...$data): void
+    {
+        try {
+            di(TaskExecutor::class)->execute(new Task([self::class, $client], ...$data));
+        } catch (Throwable $e) {
+            logger('notifier.send')->error($e->getMessage());
+        }
+    }
+
+    public function report(array $data, string $title = '业务报告'): void
+    {
+        if (empty($data)) {
+            return;
+        }
+        $name = '[('.config('app_env').') '.config('app_name').']'.$title;
+        $content = self::formatInformation($data);
+        // $this->send('xiZhi', ["[$name] ".$title, $content]);
+        // $this->send('dingTalk', ["[$name] ".$title, $content]);
+        self::xiZhi($name, $content);
+        self::dingTalk($name, $content);
+    }
+
+    public static function xiZhi(string $title, string $content): void
+    {
+        logger('notifier.xizhi')->info('[息知]业务消息通知开始');
+        $config = config('notify.xiZhi');
+        Factory::xiZhi()
+            ->setType($config['type'])
+            ->setToken($config['token'])
+            ->setMessage(
+                new XiZhiMessage(
+                    $title,
+                    transform($content, static function ($content) {
+                        return sprintf(self::MARKDOWN_TEMPLATE, $content);
+                    })
+                )
+            )->send();
+        logger('notifier.xizhi')->info('[息知]业务消息通知结束');
+    }
+
+    public static function dingTalk(string $title, string $content, bool $isAtAll = true): void
+    {
+        logger('notifier.dingtalk')->info('[钉钉]业务消息通知');
+        $config = config('notify.dingTalk');
+        Factory::dingTalk()
+            ->setToken($config['token'])
+            ->setSecret($config['secret'])
+            ->setMessage(
+                new MarkdownMessage([
+                    'title' => $title,
+                    'text' => transform($content, static function ($content) {
+                        return sprintf(self::MARKDOWN_TEMPLATE, $content);
+                    }),
+                    'isAtAll' => $isAtAll,
+                ])
+            )->send();
+        logger('notifier.dingtalk')->info('[钉钉]业务消息通知');
     }
 }
