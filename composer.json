@@ -48,8 +48,8 @@
         "hyperf/utils": "^3.0",
         "hyperf/validation": "^3.0",
         "jetbrains/phpstorm-attributes": "^1.0",
-        "wilbur-yu/hyperf-cache-ext": "dev-main",
-        "wilbur-yu/hyperf-opcache": "dev-main"
+        "wilbur-yu/hyperf-cache-ext": "^3.0",
+        "wilbur-yu/hyperf-opcache": "^3.0"
     },
     "require-dev": {
         "composer/composer": "^2.1",
